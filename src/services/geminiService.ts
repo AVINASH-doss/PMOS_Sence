@@ -49,7 +49,7 @@ export async function explainResults(resultSummary: object): Promise<string> {
   try {
     const ai = getGenAI();
     const model = ai.getGenerativeModel({ 
-      model: 'gemini-2.0-flash',
+      model: 'gemini-flash-latest',
       systemInstruction: SYSTEM_INSTRUCTION,
     });
 
@@ -68,9 +68,12 @@ Keep the response under 300 words. Use a warm, supportive tone.`;
 
     const result = await model.generateContent(prompt);
     return result.response.text();
-  } catch (error) {
-    console.error('Gemini API error:', error);
-    throw new Error('Unable to generate AI explanation. Please check your API key and try again.');
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('Gemini API error (full details):', error);
+    console.error('API Key present:', !!import.meta.env.VITE_GEMINI_API_KEY);
+    console.error('API Key length:', import.meta.env.VITE_GEMINI_API_KEY?.length);
+    throw new Error(`Unable to generate AI explanation: ${errMsg}`);
   }
 }
 
@@ -83,7 +86,7 @@ export async function chatWithAI(
   try {
     const ai = getGenAI();
     const model = ai.getGenerativeModel({ 
-      model: 'gemini-2.0-flash',
+      model: 'gemini-flash-latest',
       systemInstruction: SYSTEM_INSTRUCTION,
     });
 
@@ -119,7 +122,7 @@ export async function generateActionPlan(resultSummary: object): Promise<string>
   try {
     const ai = getGenAI();
     const model = ai.getGenerativeModel({ 
-      model: 'gemini-2.0-flash',
+      model: 'gemini-flash-latest',
       systemInstruction: SYSTEM_INSTRUCTION,
     });
 
@@ -158,7 +161,7 @@ export async function generateDoctorSummary(
   try {
     const ai = getGenAI();
     const model = ai.getGenerativeModel({ 
-      model: 'gemini-2.0-flash',
+      model: 'gemini-flash-latest',
       systemInstruction: SYSTEM_INSTRUCTION,
     });
 
