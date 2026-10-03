@@ -25,9 +25,9 @@ export const appConfig = {
 
   teamMembers: [
     { name: 'Kirthika D', role: 'Member 1', avatar: '👩‍💻' },
-    { name: 'Member 2', role: 'Member 2', avatar: '👩‍🔬' },
-    { name: 'Member 3', role: 'Member 3', avatar: '👩‍⚕️' },
-    { name: 'Member 4', role: 'Member 4', avatar: '👩‍🎓' },
-    { name: 'Member 5', role: 'Member 5', avatar: '👩‍💼' },
+    { name: 'Keerthana S', role: 'Member 2', avatar: '👩‍🔬' },
+    { name: 'Jaya Joyce', role: 'Member 3', avatar: '👩‍⚕️' },
+    { name: 'Poshika Devi', role: 'Member 4', avatar: '👩‍🎓' },
+    { name: 'Dhana Lakshmi', role: 'Member 5', avatar: '👩‍💼' },
   ],
 };
