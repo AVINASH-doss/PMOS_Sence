@@ -17,22 +17,10 @@ export default function DoctorSummaryPage() {
 
   useEffect(() => {
     const stored = localStorage.getItem('pmos_screening_result');
-    if (!stored) {
-      navigate('/assessment');
-      return;
-    }
-    try {
-      setResult(JSON.parse(stored));
-    } catch {
-      navigate('/assessment');
-    }
-
+    if (!stored) { navigate('/assessment'); return; }
+    try { setResult(JSON.parse(stored)); } catch { navigate('/assessment'); }
     const cycleData = localStorage.getItem('pmos_cycle_stats');
-    if (cycleData) {
-      try {
-        setCycleStats(JSON.parse(cycleData));
-      } catch { /* ignore */ }
-    }
+    if (cycleData) try { setCycleStats(JSON.parse(cycleData)); } catch {}
   }, [navigate]);
 
   const handleGenerateSummary = async () => {
@@ -41,177 +29,130 @@ export default function DoctorSummaryPage() {
       setError('Gemini API key not configured. Showing data-only summary.');
       return;
     }
-    setLoading(true);
-    setError('');
+    setLoading(true); setError('');
     try {
-      const summary = createAISummary(result);
-      const text = await generateDoctorSummary(summary, cycleStats || undefined);
+      const text = await generateDoctorSummary(createAISummary(result), cycleStats || undefined);
       setAiSummary(text);
     } catch (err: any) {
       setError(err.message || 'Failed to generate summary.');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const handlePrint = () => window.print();
 
   const handleDownloadPDF = async () => {
     if (!printRef.current) return;
     try {
       const html2canvas = (await import('html2canvas')).default;
       const jsPDF = (await import('jspdf')).default;
-      
-      const canvas = await html2canvas(printRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-      });
-      
+      const canvas = await html2canvas(printRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save('PMOS_Sense_Doctor_Summary.pdf');
-    } catch (err) {
-      console.error('PDF generation error:', err);
-      // Fallback to print
-      window.print();
-    }
+    } catch { window.print(); }
   };
 
   if (!result) return null;
-
   const answers = result.answers;
   const highFactors = result.contributingFactors.filter(f => f.impact === 'high' || f.impact === 'medium');
 
   return (
-    <div className="min-h-screen bg-background animate-fade-in">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div style={{ minHeight: '100vh', background: '#f8f5ff' }} className="animate-fade-in-up">
+      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem 1rem' }}>
+
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 no-print">
+        <div className="no-print" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '2rem' }}>
           <div>
-            <h1 className="text-2xl font-bold text-text-primary">My Doctor Discussion Summary</h1>
-            <p className="text-text-secondary text-sm mt-1">
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e1b3a' }}>My Doctor Discussion Summary</h1>
+            <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.25rem' }}>
               A simple summary of your responses to help you discuss with a healthcare professional.
             </p>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={handleDownloadPDF}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all"
-            >
-              <Download className="w-4 h-4" />
-              Download PDF
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button onClick={handleDownloadPDF} className="btn-primary" style={{ padding: '0.625rem 1rem', fontSize: '0.8rem' }}>
+              <Download style={{ width: '16px', height: '16px' }} /> Download PDF
             </button>
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white text-text-secondary rounded-xl text-sm font-medium border border-border hover:bg-primary-50 transition-all"
-            >
-              <Printer className="w-4 h-4" />
-              Print
+            <button onClick={handlePrint} className="btn-secondary" style={{ padding: '0.625rem 1rem', fontSize: '0.8rem' }}>
+              <Printer style={{ width: '16px', height: '16px' }} /> Print
             </button>
           </div>
         </div>
 
         {/* Summary Content */}
-        <div ref={printRef} className="bg-white rounded-3xl p-8 shadow-card border border-border">
+        <div ref={printRef} className="card" style={{ padding: '2rem' }}>
           {/* Title */}
-          <div className="text-center mb-8 pb-6 border-b border-border">
-            <h2 className="text-xl font-bold text-primary-700">{appConfig.name}</h2>
-            <p className="text-sm text-text-secondary mt-1">Doctor Discussion Summary</p>
+          <div style={{ textAlign: 'center', marginBottom: '2rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e9e2f5' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#6d28d9' }}>{appConfig.name}</h2>
+            <p style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: '0.25rem' }}>Doctor Discussion Summary</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Column 1: Basic Info + Menstrual Summary */}
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-sm font-bold text-text-primary mb-3 pb-2 border-b border-border">
-                  Basic Information
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <InfoRow label="Age" value={`${answers.age} years`} />
-                  <InfoRow label="Height" value={`${answers.height} cm`} />
-                  <InfoRow label="Weight" value={`${answers.weight} kg`} />
-                  <InfoRow label="BMI" value={result.bmi ? `${result.bmi} (${result.bmiCategory})` : 'N/A'} />
-                  <InfoRow label="Age at first period" value={`${answers.firstMenstruation} years`} />
-                </div>
-              </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '2rem' }}>
+            {/* Column 1 */}
+            <div>
+              <SectionTitle>Basic Information</SectionTitle>
+              <InfoRow label="Age" value={`${answers.age} years`} />
+              <InfoRow label="Height" value={`${answers.height} cm`} />
+              <InfoRow label="Weight" value={`${answers.weight} kg`} />
+              <InfoRow label="BMI" value={result.bmi ? `${result.bmi} (${result.bmiCategory})` : 'N/A'} />
+              <InfoRow label="Age at first period" value={`${answers.firstMenstruation} years`} />
 
               {cycleStats && (
-                <div>
-                  <h3 className="text-sm font-bold text-text-primary mb-3 pb-2 border-b border-border">
-                    Menstrual Summary
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    <InfoRow label="Average cycle length" value={`${cycleStats.averageCycleLength} days`} />
-                    <InfoRow label="Cycle variability" value={cycleStats.variability} />
-                    <InfoRow label="Missed periods" value={String(cycleStats.missedPeriods)} />
-                  </div>
+                <div style={{ marginTop: '1.5rem' }}>
+                  <SectionTitle>Menstrual Summary</SectionTitle>
+                  <InfoRow label="Average cycle length" value={`${cycleStats.averageCycleLength} days`} />
+                  <InfoRow label="Cycle variability" value={cycleStats.variability} />
+                  <InfoRow label="Missed periods" value={String(cycleStats.missedPeriods)} />
                 </div>
               )}
             </div>
 
-            {/* Column 2: Symptoms + Lifestyle */}
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-sm font-bold text-text-primary mb-3 pb-2 border-b border-border">
-                  Key Reported Symptoms
-                </h3>
-                <ul className="space-y-1.5">
-                  {highFactors.slice(0, 6).map((f, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-text-secondary">
-                      <span className="text-primary-500 mt-1">•</span>
-                      {f.questionText.replace('Do you have ', '').replace('Have you experienced ', '').replace('Do you ', '').replace('?', '')}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            {/* Column 2 */}
+            <div>
+              <SectionTitle>Key Reported Symptoms</SectionTitle>
+              <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+                {highFactors.slice(0, 6).map((f, i) => (
+                  <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', fontSize: '0.8rem', color: '#6b7280' }}>
+                    <span style={{ color: '#8b5cf6', marginTop: '2px' }}>•</span>
+                    {f.questionText.replace(/^(Do you have |Have you experienced |Do you |Have you been told that you have |Is your |Are your )/i, '').replace('?', '')}
+                  </li>
+                ))}
+              </ul>
 
-              <div>
-                <h3 className="text-sm font-bold text-text-primary mb-3 pb-2 border-b border-border">
-                  Lifestyle Factors
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <InfoRow label="Sleep" value={getAnswerLabel(answers.sleepHours)} />
-                  <InfoRow label="Exercise" value={getAnswerLabel(answers.exercise)} />
-                  <InfoRow label="Stress level" value={getAnswerLabel(answers.stressLevel)} />
-                  <InfoRow label="Diet" value={getAnswerLabel(answers.diet)} />
-                  <InfoRow label="Smoking/Alcohol" value={getAnswerLabel(answers.smokingAlcohol)} />
-                </div>
+              <div style={{ marginTop: '1.5rem' }}>
+                <SectionTitle>Lifestyle Factors</SectionTitle>
+                <InfoRow label="Sleep" value={getAnswerLabel(answers.sleepHours)} />
+                <InfoRow label="Exercise" value={getAnswerLabel(answers.exercise)} />
+                <InfoRow label="Stress level" value={getAnswerLabel(answers.stressLevel)} />
+                <InfoRow label="Diet" value={getAnswerLabel(answers.diet)} />
+                <InfoRow label="Smoking/Alcohol" value={getAnswerLabel(answers.smokingAlcohol)} />
               </div>
             </div>
 
-            {/* Column 3: Score + Patterns */}
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-sm font-bold text-text-primary mb-3 pb-2 border-b border-border">
-                  PMOS Screening Score
-                </h3>
-                <div className="flex justify-center mb-3">
-                  <CircularProgress value={result.overallScore} size={100} strokeWidth={7} />
-                </div>
-                <p
-                  className="text-center text-xs font-semibold px-3 py-1 rounded-full mx-auto w-fit"
-                  style={{ backgroundColor: result.riskRange.color + '15', color: result.riskRange.color }}
-                >
-                  {result.riskRange.label}
-                </p>
+            {/* Column 3 */}
+            <div>
+              <SectionTitle>PMOS Screening Score</SectionTitle>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                <CircularProgress value={result.overallScore} size={100} strokeWidth={7} />
               </div>
+              <p style={{
+                textAlign: 'center', fontSize: '0.7rem', fontWeight: 600,
+                padding: '0.25rem 0.75rem', borderRadius: '9999px',
+                width: 'fit-content', margin: '0 auto',
+                background: result.riskRange.color + '18', color: result.riskRange.color,
+              }}>
+                {result.riskRange.label}
+              </p>
 
-              <div>
-                <h3 className="text-sm font-bold text-text-primary mb-3 pb-2 border-b border-border">
-                  Pattern Scores
-                </h3>
-                <div className="space-y-3">
+              <div style={{ marginTop: '1.5rem' }}>
+                <SectionTitle>Pattern Scores</SectionTitle>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {result.patternScores.map(p => (
-                    <div key={p.label} className="flex justify-between items-center text-sm">
-                      <span className="text-text-secondary">{p.category}</span>
-                      <span className="font-semibold" style={{ color: p.color }}>{p.score}%</span>
+                    <div key={p.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                      <span style={{ color: '#6b7280' }}>{p.category}</span>
+                      <span style={{ fontWeight: 600, color: p.color }}>{p.score}%</span>
                     </div>
                   ))}
                 </div>
@@ -219,48 +160,40 @@ export default function DoctorSummaryPage() {
             </div>
           </div>
 
-          {/* AI Summary */}
+          {/* AI Discussion Points */}
           {!aiSummary && !loading && (
-            <div className="mt-8 text-center no-print">
-              <button
-                onClick={handleGenerateSummary}
-                disabled={loading}
-                className="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all disabled:opacity-50"
-              >
+            <div className="no-print" style={{ marginTop: '2rem', textAlign: 'center' }}>
+              <button onClick={handleGenerateSummary} disabled={loading} className="btn-primary">
                 Generate AI Discussion Points
               </button>
             </div>
           )}
 
           {loading && (
-            <div className="mt-8 flex items-center justify-center gap-3 text-text-secondary">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span className="text-sm">Generating discussion points...</span>
+            <div style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', color: '#6b7280' }}>
+              <Loader2 style={{ width: '20px', height: '20px', animation: 'spin 1s linear infinite' }} />
+              <span style={{ fontSize: '0.85rem' }}>Generating discussion points...</span>
             </div>
           )}
 
           {error && (
-            <div className="mt-6 flex items-center gap-2 text-sm text-amber-700 bg-amber-50 px-4 py-3 rounded-xl border border-amber-200">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
-              {error}
+            <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '0.75rem', padding: '0.75rem 1rem' }}>
+              <AlertCircle style={{ width: '14px', height: '14px', color: '#f59e0b', flexShrink: 0 }} />
+              <span style={{ fontSize: '0.8rem', color: '#92400e' }}>{error}</span>
             </div>
           )}
 
           {aiSummary && (
-            <div className="mt-8 pt-6 border-t border-border">
-              <h3 className="text-sm font-bold text-text-primary mb-3">AI-Generated Discussion Points</h3>
-              <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
-                {aiSummary}
-              </div>
+            <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #e9e2f5' }}>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e1b3a', marginBottom: '0.75rem' }}>AI-Generated Discussion Points</h3>
+              <p style={{ fontSize: '0.8rem', color: '#6b7280', lineHeight: 1.7, whiteSpace: 'pre-line' }}>{aiSummary}</p>
             </div>
           )}
 
           {/* Disclaimer */}
-          <div className="mt-8 pt-6 border-t border-border">
-            <div className="flex items-start gap-2 text-xs text-text-muted">
-              <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-amber-400" />
-              <p>{appConfig.summaryDisclaimer}</p>
-            </div>
+          <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #e9e2f5', display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+            <AlertCircle style={{ width: '14px', height: '14px', color: '#f59e0b', marginTop: '2px', flexShrink: 0 }} />
+            <p style={{ fontSize: '0.7rem', color: '#9ca3af' }}>{appConfig.summaryDisclaimer}</p>
           </div>
         </div>
       </div>
@@ -268,36 +201,30 @@ export default function DoctorSummaryPage() {
   );
 }
 
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1e1b3a', marginBottom: '0.75rem', paddingBottom: '0.5rem', borderBottom: '1px solid #e9e2f5' }}>
+      {children}
+    </h3>
+  );
+}
+
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between">
-      <span className="text-text-muted">{label}</span>
-      <span className="font-medium text-text-primary">{value}</span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.375rem', fontSize: '0.8rem' }}>
+      <span style={{ color: '#9ca3af' }}>{label}</span>
+      <span style={{ fontWeight: 500, color: '#1e1b3a' }}>{value}</span>
     </div>
   );
 }
 
 function getAnswerLabel(value: any): string {
   const labels: Record<string, string> = {
-    'less5': 'Less than 5h',
-    '5-6': '5–6 hours',
-    '7-8': '7–8 hours',
-    'more8': 'More than 8h',
-    'daily': 'Daily',
-    '3-5': '3–5 times/week',
-    '1-2': '1–2 times/week',
-    'rarely': 'Rarely',
-    'low': 'Low',
-    'moderate': 'Moderate',
-    'high': 'High',
-    'veryHigh': 'Very high',
-    'balanced': 'Balanced',
-    'mostly': 'Mostly healthy',
-    'mixed': 'Mixed',
-    'processed': 'Mostly processed',
-    'no': 'No',
-    'occasionally': 'Occasionally',
-    'regularly': 'Regularly',
+    'less5': 'Less than 5h', '5-6': '5–6 hours', '7-8': '7–8 hours', 'more8': 'More than 8h',
+    'daily': 'Daily', '3-5': '3–5 times/week', '1-2': '1–2 times/week', 'rarely': 'Rarely',
+    'low': 'Low', 'moderate': 'Moderate', 'high': 'High', 'veryHigh': 'Very high',
+    'balanced': 'Balanced', 'mostly': 'Mostly healthy', 'mixed': 'Mixed', 'processed': 'Mostly processed',
+    'no': 'No', 'occasionally': 'Occasionally', 'regularly': 'Regularly',
   };
   return labels[String(value)] || String(value);
 }

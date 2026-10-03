@@ -5,67 +5,78 @@ import Disclaimer from '../components/Disclaimer';
 
 export default function HomePage() {
   return (
-    <div className="animate-fade-in">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-lavender-50 via-white to-accent-50">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary-200/20 rounded-full blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-accent-200/20 rounded-full blur-3xl" />
-        </div>
+    <div className="animate-fade-in-up">
+      {/* ======== HERO ======== */}
+      <section style={{
+        position: 'relative',
+        overflow: 'hidden',
+        background: 'linear-gradient(135deg, #f8f5ff 0%, #ffffff 40%, #fdf2f8 100%)',
+      }}>
+        {/* Decorative blobs */}
+        <div style={{ position: 'absolute', top: '-160px', right: '-160px', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', bottom: '-160px', left: '-160px', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(236,72,153,0.06) 0%, transparent 70%)', borderRadius: '50%' }} />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Text */}
-            <div className="animate-slide-up">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight">
-                <span className="bg-gradient-to-r from-primary-800 via-primary-600 to-accent-500 bg-clip-text text-transparent">
-                  {appConfig.heroHeading.split(' ').slice(0, 3).join(' ')}
+        <div className="section-container" style={{ position: 'relative', paddingTop: '4rem', paddingBottom: '4rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '3rem', alignItems: 'center' }} className="lg:!grid-cols-2">
+            {/* Text Side */}
+            <div style={{ textAlign: 'left' }}>
+              <h1 style={{ fontSize: 'clamp(2.25rem, 5vw, 3.5rem)', fontWeight: 800, lineHeight: 1.1, marginBottom: '1.5rem' }}>
+                <span style={{ display: 'block', background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  Understand Your
                 </span>
-                <br />
-                <span className="bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent">
-                  {appConfig.heroHeading.split(' ').slice(3).join(' ')}
+                <span style={{ display: 'block', background: 'linear-gradient(135deg, #7c3aed, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  PMOS Risk Earlier.
                 </span>
               </h1>
-              <p className="mt-6 text-lg text-text-secondary leading-relaxed max-w-xl">
+              <p style={{ fontSize: '1.05rem', color: '#6b7280', lineHeight: 1.7, maxWidth: '520px', marginBottom: '2rem' }}>
                 {appConfig.heroSubtitle}
               </p>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <Link
-                  to="/assessment"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl font-semibold shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 hover:-translate-y-0.5 transition-all duration-200"
-                >
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                <Link to="/assessment" className="btn-primary">
                   Start Risk Assessment
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight style={{ width: '16px', height: '16px' }} />
                 </Link>
-                <a
-                  href="#how-it-works"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-white text-primary-700 rounded-xl font-semibold border border-primary-200 hover:bg-primary-50 hover:border-primary-300 transition-all duration-200"
-                >
+                <a href="#how-it-works" className="btn-secondary">
                   How It Works
                 </a>
               </div>
             </div>
 
-            {/* Hero Illustration */}
-            <div className="hidden lg:flex justify-center">
-              <div className="relative">
-                <div className="w-80 h-80 bg-gradient-to-br from-primary-100 to-accent-100 rounded-full flex items-center justify-center">
-                  <div className="w-64 h-64 bg-gradient-to-br from-primary-200/50 to-accent-200/50 rounded-full flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-24 h-24 mx-auto bg-white rounded-3xl shadow-xl flex items-center justify-center mb-4">
-                        <Heart className="w-12 h-12 text-accent-400" fill="currentColor" />
+            {/* Illustration Side */}
+            <div className="hidden lg:flex" style={{ justifyContent: 'center' }}>
+              <div style={{ position: 'relative' }}>
+                <div style={{
+                  width: '300px', height: '300px',
+                  background: 'linear-gradient(135deg, #ede5ff, #fce7f3)',
+                  borderRadius: '50%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <div style={{
+                    width: '220px', height: '220px',
+                    background: 'linear-gradient(135deg, rgba(221,208,255,0.5), rgba(251,207,232,0.5))',
+                    borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{
+                        width: '80px', height: '80px', margin: '0 auto 12px',
+                        background: 'white', borderRadius: '20px',
+                        boxShadow: '0 8px 24px rgba(139,92,246,0.15)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <Heart style={{ width: '40px', height: '40px', color: '#f472b6', fill: '#f472b6' }} />
                       </div>
-                      <p className="text-primary-700 font-semibold text-sm">PMOS Screening</p>
-                      <p className="text-primary-500 text-xs mt-1">AI-Assisted Analysis</p>
+                      <p style={{ color: '#6d28d9', fontWeight: 600, fontSize: '0.8rem' }}>PMOS Screening</p>
+                      <p style={{ color: '#8b5cf6', fontSize: '0.7rem', marginTop: '2px' }}>AI-Assisted Analysis</p>
                     </div>
                   </div>
                 </div>
                 {/* Floating badges */}
-                <div className="absolute top-4 -left-4 bg-white rounded-2xl shadow-lg p-3 animate-bounce" style={{ animationDuration: '3s' }}>
-                  <Activity className="w-6 h-6 text-primary-500" />
+                <div style={{ position: 'absolute', top: '12px', left: '-12px', background: 'white', borderRadius: '16px', padding: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', animation: 'bounce 3s infinite' }}>
+                  <Activity style={{ width: '22px', height: '22px', color: '#8b5cf6' }} />
                 </div>
-                <div className="absolute bottom-8 -right-4 bg-white rounded-2xl shadow-lg p-3 animate-bounce" style={{ animationDuration: '4s', animationDelay: '1s' }}>
-                  <Sparkles className="w-6 h-6 text-accent-500" />
+                <div style={{ position: 'absolute', bottom: '24px', right: '-12px', background: 'white', borderRadius: '16px', padding: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', animation: 'bounce 4s infinite 1s' }}>
+                  <Sparkles style={{ width: '22px', height: '22px', color: '#ec4899' }} />
                 </div>
               </div>
             </div>
@@ -73,95 +84,94 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Feature Cards */}
-      <section id="how-it-works" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl font-bold text-text-primary">How PMOS Sense Works</h2>
-          <p className="text-text-secondary mt-2">Three steps to understand your PMOS risk profile</p>
+      {/* ======== FEATURE CARDS ======== */}
+      <section id="how-it-works" className="section-container" style={{ paddingTop: '4rem', paddingBottom: '2rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e1b3a' }}>How PMOS Sense Works</h2>
+          <p style={{ color: '#6b7280', marginTop: '0.5rem', fontSize: '0.95rem' }}>Three steps to understand your PMOS risk profile</p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
           {[
-            {
-              icon: Activity,
-              title: 'Menstrual Pattern Analysis',
-              description: 'Track and analyse your cycle pattern.',
-              color: 'from-primary-500 to-primary-600',
-              bg: 'bg-primary-50',
-            },
-            {
-              icon: Brain,
-              title: 'Explainable AI Risk Assessment',
-              description: 'Understand your results with clear explanations.',
-              color: 'from-accent-500 to-accent-600',
-              bg: 'bg-accent-50',
-            },
-            {
-              icon: PieChart,
-              title: 'Personalised PMOS Pattern Map',
-              description: 'Get recommendations based on your unique symptom pattern.',
-              color: 'from-primary-400 to-accent-400',
-              bg: 'bg-lavender-50',
-            },
-          ].map((feature, index) => (
-            <div
-              key={index}
-              className="group bg-white rounded-2xl p-6 shadow-card hover:shadow-card-hover transition-all duration-300 border border-border hover:-translate-y-1"
-            >
-              <div className={`w-14 h-14 ${feature.bg} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                <feature.icon className="w-7 h-7 text-primary-600" />
+            { icon: Activity, title: 'Menstrual Pattern Analysis', desc: 'Track and analyse your cycle pattern.', bg: '#f5f0ff', iconColor: '#7c3aed' },
+            { icon: Brain, title: 'Explainable AI Risk Assessment', desc: 'Understand your results with clear explanations.', bg: '#fdf2f8', iconColor: '#ec4899' },
+            { icon: PieChart, title: 'Personalised PMOS Pattern Map', desc: 'Get recommendations based on your unique symptom pattern.', bg: '#f0eaff', iconColor: '#8b5cf6' },
+          ].map((feature, i) => (
+            <div key={i} className="card" style={{ padding: '1.5rem', cursor: 'default' }}>
+              <div style={{
+                width: '52px', height: '52px', background: feature.bg, borderRadius: '14px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem',
+              }}>
+                <feature.icon style={{ width: '26px', height: '26px', color: feature.iconColor }} />
               </div>
-              <h3 className="text-lg font-semibold text-text-primary mb-2">{feature.title}</h3>
-              <p className="text-sm text-text-secondary leading-relaxed">{feature.description}</p>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: '#1e1b3a', marginBottom: '0.5rem' }}>{feature.title}</h3>
+              <p style={{ fontSize: '0.875rem', color: '#6b7280', lineHeight: 1.6 }}>{feature.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Steps */}
-      <section className="bg-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl font-bold text-text-primary">Your Screening Journey</h2>
+      {/* ======== STEPS ======== */}
+      <section style={{ background: 'white', padding: '4rem 0' }}>
+        <div className="section-container">
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e1b3a' }}>Your Screening Journey</h2>
           </div>
-          <div className="grid md:grid-cols-4 gap-8">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
             {[
               { step: '1', title: 'Complete Assessment', desc: 'Answer 27 questions about your health patterns' },
               { step: '2', title: 'Get Your Score', desc: 'Receive your PMOS screening score and pattern map' },
               { step: '3', title: 'Understand Results', desc: 'AI explains what your results may indicate' },
               { step: '4', title: 'Take Action', desc: 'Get personalised recommendations and doctor summary' },
-            ].map((item, index) => (
-              <div key={index} className="text-center">
-                <div className="w-12 h-12 mx-auto bg-gradient-to-br from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center text-white font-bold text-lg mb-4 shadow-md">
+            ].map((item, i) => (
+              <div key={i} style={{ textAlign: 'center' }}>
+                <div style={{
+                  width: '48px', height: '48px', margin: '0 auto 1rem',
+                  background: 'linear-gradient(135deg, #8b5cf6, #ec4899)',
+                  borderRadius: '14px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'white', fontWeight: 700, fontSize: '1.1rem',
+                  boxShadow: '0 4px 12px rgba(139,92,246,0.25)'
+                }}>
                   {item.step}
                 </div>
-                <h3 className="font-semibold text-text-primary mb-1">{item.title}</h3>
-                <p className="text-sm text-text-secondary">{item.desc}</p>
+                <h3 style={{ fontWeight: 600, color: '#1e1b3a', marginBottom: '0.25rem', fontSize: '0.95rem' }}>{item.title}</h3>
+                <p style={{ fontSize: '0.8rem', color: '#6b7280', lineHeight: 1.5 }}>{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="bg-gradient-to-r from-primary-600 to-accent-500 rounded-3xl p-8 md:p-12 text-center text-white shadow-elevated">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to Start?</h2>
-          <p className="text-white/90 max-w-xl mx-auto mb-8">
+      {/* ======== CTA ======== */}
+      <section className="section-container" style={{ paddingTop: '3rem', paddingBottom: '3rem' }}>
+        <div style={{
+          background: 'linear-gradient(135deg, #7c3aed, #ec4899)',
+          borderRadius: '1.5rem',
+          padding: '3rem 2rem',
+          textAlign: 'center',
+          color: 'white',
+          boxShadow: '0 10px 40px rgba(124,58,237,0.2)'
+        }}>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '1rem' }}>Ready to Start?</h2>
+          <p style={{ opacity: 0.9, maxWidth: '500px', margin: '0 auto 2rem', fontSize: '0.95rem', lineHeight: 1.6 }}>
             Take the first step towards understanding your PMOS risk. Our AI-assisted screening takes approximately 5 minutes.
           </p>
-          <Link
-            to="/assessment"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-white text-primary-700 rounded-xl font-semibold hover:bg-primary-50 hover:shadow-lg transition-all duration-200"
-          >
+          <Link to="/assessment" style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+            padding: '0.875rem 2rem', background: 'white', color: '#6d28d9',
+            borderRadius: '0.75rem', fontWeight: 600, fontSize: '0.95rem',
+            textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            transition: 'transform 0.2s',
+          }}>
             Begin Assessment
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight style={{ width: '18px', height: '18px' }} />
           </Link>
         </div>
       </section>
 
-      {/* Disclaimer */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+      {/* ======== DISCLAIMER ======== */}
+      <div className="section-container" style={{ paddingBottom: '3rem' }}>
         <Disclaimer />
       </div>
     </div>

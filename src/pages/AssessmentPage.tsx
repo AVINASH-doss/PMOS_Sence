@@ -15,7 +15,6 @@ export default function AssessmentPage() {
   const currentSection = sections[currentStep];
   const progress = ((currentStep + 1) / totalSteps) * 100;
 
-  // BMI calculation for display
   const height = Number(answers.height) || 0;
   const weight = Number(answers.weight) || 0;
   const showBMI = currentSection.key === 'basic' && height > 0 && weight > 0;
@@ -62,132 +61,166 @@ export default function AssessmentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+    <div style={{ minHeight: '100vh', background: '#f8f5ff' }}>
+      <div style={{ maxWidth: '720px', margin: '0 auto', padding: '2rem 1rem' }}>
+        {/* Header Row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
           <button
             onClick={() => currentStep > 0 ? handlePrevious() : navigate('/')}
-            className="flex items-center gap-2 text-text-secondary hover:text-primary-600 transition-colors"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: '#6b7280', fontSize: '0.875rem', fontWeight: 500,
+            }}
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm font-medium">Back</span>
+            <ArrowLeft style={{ width: '16px', height: '16px' }} />
+            Back
           </button>
-          <span className="text-sm font-medium text-text-secondary">
+          <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#6b7280' }}>
             {currentStep + 1}/{totalSteps}
           </span>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full h-2 bg-primary-100 rounded-full mb-8 overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-primary-500 to-accent-500 rounded-full transition-all duration-500 ease-out"
-            style={{ width: `${progress}%` }}
-          />
+        <div style={{ width: '100%', height: '8px', background: '#ede5ff', borderRadius: '4px', marginBottom: '2rem', overflow: 'hidden' }}>
+          <div style={{
+            height: '100%',
+            width: `${progress}%`,
+            background: 'linear-gradient(90deg, #8b5cf6, #ec4899)',
+            borderRadius: '4px',
+            transition: 'width 0.5s ease-out',
+          }} />
         </div>
 
         {/* Section Title */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-text-primary">{currentSection.label}</h1>
-          <p className="text-text-secondary mt-1">
+        <div style={{ marginBottom: '2rem' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e1b3a', marginBottom: '0.25rem' }}>
+            {currentSection.label}
+          </h1>
+          <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>
             {getSectionDescription(currentSection.key)}
           </p>
         </div>
 
-        {/* Questions */}
-        <div className="space-y-6">
-          {currentSection.questions.map((question) => (
-            <div
-              key={question.id}
-              className={`bg-white rounded-2xl p-6 shadow-card border transition-colors ${
-                errors.includes(question.id) ? 'border-error' : 'border-border'
-              }`}
-            >
-              <label className="block text-sm font-semibold text-text-primary mb-4">
-                <span className="text-primary-500 mr-1">{question.number}.</span>
-                {question.text}
-                {question.required && <span className="text-error ml-1">*</span>}
-              </label>
+        {/* Question Cards */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {currentSection.questions.map((question) => {
+            const hasError = errors.includes(question.id);
+            return (
+              <div
+                key={question.id}
+                className="card"
+                style={{
+                  padding: '1.5rem',
+                  borderColor: hasError ? '#ef4444' : undefined,
+                }}
+              >
+                <label style={{
+                  display: 'block', fontSize: '0.9rem', fontWeight: 600,
+                  color: '#1e1b3a', marginBottom: '1rem',
+                }}>
+                  <span style={{ color: '#8b5cf6', marginRight: '4px' }}>{question.number}.</span>
+                  {question.text}
+                  {question.required && <span style={{ color: '#ef4444', marginLeft: '4px' }}>*</span>}
+                </label>
 
-              {question.type === 'number' && (
-                <div className="flex items-center gap-3">
-                  <input
-                    type="number"
-                    value={answers[question.id] ?? ''}
-                    onChange={(e) => handleAnswer(question.id, e.target.value)}
-                    placeholder={question.placeholder}
-                    min={question.min}
-                    max={question.max}
-                    className="w-full px-4 py-3 rounded-xl border border-border bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all text-text-primary"
-                  />
-                  {question.unit && (
-                    <span className="text-sm text-text-muted font-medium">{question.unit}</span>
-                  )}
-                </div>
-              )}
+                {question.type === 'number' && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <input
+                      type="number"
+                      value={answers[question.id] ?? ''}
+                      onChange={(e) => handleAnswer(question.id, e.target.value)}
+                      placeholder={question.placeholder}
+                      min={question.min}
+                      max={question.max}
+                      style={{
+                        width: '100%', padding: '0.75rem 1rem',
+                        borderRadius: '0.75rem', border: '1px solid #e9e2f5',
+                        background: '#faf8ff', fontSize: '0.9rem',
+                        outline: 'none', color: '#1e1b3a',
+                        transition: 'border-color 0.2s',
+                      }}
+                      onFocus={(e) => e.target.style.borderColor = '#8b5cf6'}
+                      onBlur={(e) => e.target.style.borderColor = '#e9e2f5'}
+                    />
+                    {question.unit && (
+                      <span style={{ fontSize: '0.8rem', color: '#9ca3af', fontWeight: 500, whiteSpace: 'nowrap' }}>{question.unit}</span>
+                    )}
+                  </div>
+                )}
 
-              {question.type === 'radio' && question.options && (
-                <div className="flex flex-wrap gap-3">
-                  {question.options.map((option) => {
-                    const isSelected = String(answers[question.id]) === option.value;
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => handleAnswer(question.id, option.value)}
-                        className={`px-4 py-2.5 rounded-xl text-sm font-medium border transition-all duration-200 ${
-                          isSelected
-                            ? 'bg-primary-500 text-white border-primary-500 shadow-md'
-                            : 'bg-white text-text-secondary border-border hover:border-primary-300 hover:text-primary-600'
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+                {question.type === 'radio' && question.options && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.625rem' }}>
+                    {question.options.map((option) => {
+                      const isSelected = String(answers[question.id]) === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => handleAnswer(question.id, option.value)}
+                          style={{
+                            padding: '0.625rem 1.125rem',
+                            borderRadius: '0.75rem',
+                            fontSize: '0.85rem',
+                            fontWeight: 500,
+                            border: isSelected ? '2px solid #8b5cf6' : '1.5px solid #e9e2f5',
+                            background: isSelected ? '#8b5cf6' : 'white',
+                            color: isSelected ? 'white' : '#6b7280',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s',
+                            boxShadow: isSelected ? '0 2px 8px rgba(139,92,246,0.25)' : 'none',
+                          }}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
 
-              {errors.includes(question.id) && (
-                <p className="text-error text-xs mt-2">This field is required</p>
-              )}
-            </div>
-          ))}
+                {hasError && (
+                  <p style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.5rem' }}>This field is required</p>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* BMI Display */}
         {showBMI && bmi !== null && (
-          <div className="mt-6 bg-gradient-to-r from-primary-50 to-accent-50 rounded-2xl p-5 border border-primary-100">
-            <div className="flex items-center gap-3">
-              <CheckCircle className="w-5 h-5 text-primary-500" />
-              <div>
-                <p className="text-sm font-semibold text-text-primary">
-                  Your BMI: <span className="text-primary-600">{bmi}</span>
-                </p>
-                <p className="text-xs text-text-secondary">
-                  Category: {getBMICategory(bmi)}
-                </p>
-              </div>
+          <div style={{
+            marginTop: '1rem', padding: '1rem 1.25rem',
+            background: 'linear-gradient(135deg, #f5f0ff, #fdf2f8)',
+            borderRadius: '1rem', border: '1px solid #ede5ff',
+            display: 'flex', alignItems: 'center', gap: '0.75rem',
+          }}>
+            <CheckCircle style={{ width: '20px', height: '20px', color: '#8b5cf6', flexShrink: 0 }} />
+            <div>
+              <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1e1b3a' }}>
+                Your BMI: <span style={{ color: '#7c3aed' }}>{bmi}</span>
+              </p>
+              <p style={{ fontSize: '0.75rem', color: '#6b7280' }}>Category: {getBMICategory(bmi)}</p>
             </div>
           </div>
         )}
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between mt-8 pb-8">
+        <div style={{
+          display: 'flex', justifyContent: 'space-between',
+          marginTop: '2rem', paddingBottom: '2rem',
+        }}>
           <button
             onClick={handlePrevious}
             disabled={currentStep === 0}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed bg-white text-text-secondary border border-border hover:bg-primary-50 hover:border-primary-200"
+            className="btn-secondary"
+            style={{ opacity: currentStep === 0 ? 0.3 : 1 }}
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft style={{ width: '16px', height: '16px' }} />
             Previous
           </button>
-          <button
-            onClick={handleNext}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-200 bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-500/25 hover:shadow-xl hover:-translate-y-0.5"
-          >
+          <button onClick={handleNext} className="btn-primary">
             {currentStep === totalSteps - 1 ? 'Get Results' : 'Next'}
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight style={{ width: '16px', height: '16px' }} />
           </button>
         </div>
       </div>

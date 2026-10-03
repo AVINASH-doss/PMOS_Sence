@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { HelpCircle, ArrowRight, TrendingUp, Activity, Zap, Heart, AlertCircle } from 'lucide-react';
+import { HelpCircle, ArrowRight, AlertCircle } from 'lucide-react';
 import CircularProgress from '../components/CircularProgress';
 import Disclaimer from '../components/Disclaimer';
 import { type ScoringResult, createAISummary } from '../logic/scoring';
@@ -10,21 +10,14 @@ import { appConfig } from '../config/appConfig';
 export default function ResultsPage() {
   const navigate = useNavigate();
   const [result, setResult] = useState<ScoringResult | null>(null);
-  const [explanation, setExplanation] = useState<string>('');
+  const [explanation, setExplanation] = useState('');
   const [explLoading, setExplLoading] = useState(false);
   const [explError, setExplError] = useState('');
 
   useEffect(() => {
     const stored = localStorage.getItem('pmos_screening_result');
-    if (!stored) {
-      navigate('/assessment');
-      return;
-    }
-    try {
-      setResult(JSON.parse(stored));
-    } catch {
-      navigate('/assessment');
-    }
+    if (!stored) { navigate('/assessment'); return; }
+    try { setResult(JSON.parse(stored)); } catch { navigate('/assessment'); }
   }, [navigate]);
 
   const handleExplain = async () => {
@@ -36,8 +29,7 @@ export default function ResultsPage() {
     setExplLoading(true);
     setExplError('');
     try {
-      const summary = createAISummary(result);
-      const text = await explainResults(summary);
+      const text = await explainResults(createAISummary(result));
       setExplanation(text);
     } catch (err: any) {
       setExplError(err.message || 'Failed to generate explanation.');
@@ -48,153 +40,128 @@ export default function ResultsPage() {
 
   if (!result) return null;
 
-  const patternIcons = [Activity, TrendingUp, Zap, Heart];
-
   return (
-    <div className="min-h-screen bg-background animate-fade-in">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Overall Score */}
-        <div className="bg-white rounded-3xl p-8 shadow-card border border-border mb-8">
-          <h1 className="text-2xl font-bold text-text-primary text-center mb-8">
+    <div style={{ minHeight: '100vh', background: '#f8f5ff' }} className="animate-fade-in-up">
+      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem 1rem' }}>
+
+        {/* ======== Overall Score ======== */}
+        <div className="card" style={{ padding: '2.5rem 2rem', marginBottom: '1.5rem', textAlign: 'center' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e1b3a', marginBottom: '2rem' }}>
             Your PMOS Screening Score
           </h1>
 
-          <div className="flex flex-col md:flex-row items-center justify-center gap-8">
-            <div className="animate-pulse-glow rounded-full">
-              <CircularProgress
-                value={result.overallScore}
-                size={160}
-                strokeWidth={10}
-                showPercent={true}
-              />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}
+               className="md:!flex-row md:!justify-center md:!gap-12">
+            <div className="animate-pulse-glow" style={{ borderRadius: '50%' }}>
+              <CircularProgress value={result.overallScore} size={160} strokeWidth={10} showPercent={true} />
             </div>
 
-            <div className="text-center md:text-left max-w-md">
-              <span
-                className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold text-white mb-3"
-                style={{ backgroundColor: result.riskRange.color }}
-              >
+            <div style={{ textAlign: 'center', maxWidth: '380px' }} className="md:!text-left">
+              <span style={{
+                display: 'inline-block', padding: '0.375rem 1rem', borderRadius: '9999px',
+                fontSize: '0.8rem', fontWeight: 600, color: 'white', marginBottom: '0.75rem',
+                background: result.riskRange.color,
+              }}>
                 {result.riskRange.label}
               </span>
-              <p className="text-text-secondary text-sm leading-relaxed">
+              <p style={{ fontSize: '0.875rem', color: '#6b7280', lineHeight: 1.7 }}>
                 Your responses indicate a {result.riskRange.label.toLowerCase().replace(' reported-risk range', '')} concentration of reported PMOS-related symptoms. This is a screening result and not a diagnosis.
               </p>
               <button
                 onClick={handleExplain}
                 disabled={explLoading}
-                className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border border-accent-200 text-accent-600 bg-accent-50 hover:bg-accent-100 transition-all disabled:opacity-50"
+                style={{
+                  marginTop: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                  padding: '0.5rem 1rem', borderRadius: '0.75rem', fontSize: '0.8rem', fontWeight: 500,
+                  border: '1px solid #fbcfe8', background: '#fdf2f8', color: '#db2777',
+                  cursor: 'pointer', opacity: explLoading ? 0.5 : 1,
+                }}
               >
-                <HelpCircle className="w-4 h-4" />
+                <HelpCircle style={{ width: '14px', height: '14px' }} />
                 {explLoading ? 'Analyzing...' : 'What does this mean?'}
               </button>
             </div>
           </div>
 
-          {/* AI Explanation */}
           {explanation && (
-            <div className="mt-6 bg-lavender-50 rounded-2xl p-5 border border-primary-100">
-              <p className="text-sm text-text-primary leading-relaxed whitespace-pre-line">{explanation}</p>
+            <div style={{ marginTop: '1.5rem', background: '#f5f0ff', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #ede5ff', textAlign: 'left' }}>
+              <p style={{ fontSize: '0.85rem', color: '#1e1b3a', lineHeight: 1.7, whiteSpace: 'pre-line' }}>{explanation}</p>
             </div>
           )}
           {explError && (
-            <div className="mt-6 bg-red-50 rounded-2xl p-4 border border-red-200 flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-red-700">{explError}</p>
+            <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.75rem', padding: '0.75rem 1rem' }}>
+              <AlertCircle style={{ width: '14px', height: '14px', color: '#ef4444', flexShrink: 0 }} />
+              <p style={{ fontSize: '0.8rem', color: '#991b1b' }}>{explError}</p>
             </div>
           )}
         </div>
 
-        {/* Pattern Map */}
-        <div className="bg-white rounded-3xl p-8 shadow-card border border-border mb-8">
-          <h2 className="text-xl font-bold text-text-primary text-center mb-8">
+        {/* ======== Pattern Map ======== */}
+        <div className="card" style={{ padding: '2rem', marginBottom: '1.5rem', textAlign: 'center' }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1e1b3a', marginBottom: '2rem' }}>
             Your PMOS Pattern Map
           </h2>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {result.patternScores.map((pattern, index) => {
-              const Icon = patternIcons[index] || Activity;
-              return (
-                <div key={pattern.label} className="text-center">
-                  <CircularProgress
-                    value={pattern.score}
-                    size={100}
-                    strokeWidth={7}
-                    showPercent={false}
-                    color={pattern.color}
-                  />
-                  <p className="text-sm font-semibold text-text-primary mt-2">{pattern.category}</p>
-                  <span
-                    className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                    style={{
-                      backgroundColor: pattern.color + '15',
-                      color: pattern.color,
-                    }}
-                  >
-                    {pattern.patternLabel}
-                  </span>
-                </div>
-              );
-            })}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1.5rem', justifyItems: 'center' }}>
+            {result.patternScores.map((pattern) => (
+              <div key={pattern.label} style={{ textAlign: 'center' }}>
+                <CircularProgress value={pattern.score} size={100} strokeWidth={7} showPercent={false} color={pattern.color} />
+                <p style={{ fontSize: '0.8rem', fontWeight: 600, color: '#1e1b3a', marginTop: '0.5rem' }}>{pattern.category}</p>
+                <span style={{
+                  display: 'inline-block', marginTop: '0.25rem', padding: '0.125rem 0.625rem',
+                  borderRadius: '9999px', fontSize: '0.7rem', fontWeight: 500,
+                  background: pattern.color + '18', color: pattern.color,
+                }}>
+                  {pattern.patternLabel}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Contributing Factors */}
-        <div className="bg-white rounded-3xl p-8 shadow-card border border-border mb-8">
-          <h2 className="text-xl font-bold text-text-primary mb-2">
+        {/* ======== Contributing Factors ======== */}
+        <div className="card" style={{ padding: '2rem', marginBottom: '1.5rem' }}>
+          <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#1e1b3a', marginBottom: '0.5rem' }}>
             Main Contributing Responses
           </h2>
-          <p className="text-sm text-text-secondary mb-6">
+          <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '1.5rem' }}>
             These reported factors contributed most to your screening result.
           </p>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
             {result.contributingFactors
               .filter(f => f.impact === 'high')
               .slice(0, 8)
-              .map((factor, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col items-center gap-2 p-4 bg-lavender-50 rounded-2xl border border-primary-100 text-center"
-                >
-                  <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
-                    <AlertCircle className="w-5 h-5 text-primary-600" />
+              .map((factor, i) => (
+                <div key={i} style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
+                  padding: '1rem', background: '#f5f0ff', borderRadius: '1rem', border: '1px solid #ede5ff', textAlign: 'center',
+                }}>
+                  <div style={{ width: '36px', height: '36px', background: '#ede5ff', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <AlertCircle style={{ width: '18px', height: '18px', color: '#7c3aed' }} />
                   </div>
-                  <span className="text-xs font-medium text-text-primary leading-tight">
-                    {factor.questionText.replace('Do you have ', '').replace('Have you experienced ', '').replace('Do you ', '').replace('?', '')}
+                  <span style={{ fontSize: '0.7rem', fontWeight: 500, color: '#1e1b3a', lineHeight: 1.3 }}>
+                    {factor.questionText.replace(/^(Do you have |Have you experienced |Do you |Have you been told that you have |Is your |Are your )/i, '').replace('?', '')}
                   </span>
                 </div>
               ))}
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
-          <Link
-            to="/action-plan"
-            className="flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
-          >
-            View Action Plan
-            <ArrowRight className="w-4 h-4" />
+        {/* ======== Action Buttons ======== */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', marginBottom: '1.5rem' }}>
+          <Link to="/action-plan" className="btn-primary" style={{ justifyContent: 'center', padding: '1rem 1.5rem' }}>
+            View Action Plan <ArrowRight style={{ width: '16px', height: '16px' }} />
           </Link>
-          <Link
-            to="/ask-ai"
-            className="flex items-center justify-center gap-2 px-6 py-4 bg-white text-primary-700 rounded-2xl font-semibold border border-primary-200 hover:bg-primary-50 transition-all"
-          >
-            Ask AI Questions
-            <ArrowRight className="w-4 h-4" />
+          <Link to="/ask-ai" className="btn-secondary" style={{ justifyContent: 'center', padding: '1rem 1.5rem' }}>
+            Ask AI Questions <ArrowRight style={{ width: '16px', height: '16px' }} />
           </Link>
-          <Link
-            to="/doctor-summary"
-            className="flex items-center justify-center gap-2 px-6 py-4 bg-white text-primary-700 rounded-2xl font-semibold border border-primary-200 hover:bg-primary-50 transition-all"
-          >
-            Doctor Summary
-            <ArrowRight className="w-4 h-4" />
+          <Link to="/doctor-summary" className="btn-secondary" style={{ justifyContent: 'center', padding: '1rem 1.5rem' }}>
+            Doctor Summary <ArrowRight style={{ width: '16px', height: '16px' }} />
           </Link>
         </div>
 
-        {/* Disclaimers */}
+        {/* ======== Disclaimers ======== */}
         <Disclaimer text={appConfig.scoringDisclaimer} />
-        <div className="mt-3">
+        <div style={{ marginTop: '0.75rem' }}>
           <Disclaimer text={appConfig.disclaimer} variant="warning" />
         </div>
       </div>

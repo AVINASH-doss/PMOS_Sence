@@ -7,7 +7,6 @@ const SUGGESTED_QUESTIONS = [
   'What does irregular periods mean?',
   'How can I improve my score?',
   'What should I discuss with my doctor?',
-  'Why did acne affect my result?',
   'What lifestyle factors can I improve?',
 ];
 
@@ -21,27 +20,15 @@ export default function AskAIPage() {
 
   useEffect(() => {
     const stored = localStorage.getItem('pmos_screening_result');
-    if (stored) {
-      try {
-        setResult(JSON.parse(stored));
-      } catch { /* ignore */ }
-    }
+    if (stored) try { setResult(JSON.parse(stored)); } catch {}
   }, []);
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
   const sendMessage = async (text: string) => {
     if (!text.trim()) return;
-    if (!result) {
-      setError('Please complete the screening assessment first to use AI chat.');
-      return;
-    }
-    if (!isGeminiConfigured()) {
-      setError('Gemini API key is not configured. Please add VITE_GEMINI_API_KEY to your .env file.');
-      return;
-    }
+    if (!result) { setError('Please complete the screening assessment first.'); return; }
+    if (!isGeminiConfigured()) { setError('Gemini API key not configured. Add VITE_GEMINI_API_KEY to .env.'); return; }
 
     const userMessage: AIMessage = { role: 'user', content: text.trim() };
     setMessages(prev => [...prev, userMessage]);
@@ -50,121 +37,92 @@ export default function AskAIPage() {
     setError('');
 
     try {
-      const summary = createAISummary(result);
-      const response = await chatWithAI(text.trim(), summary, messages);
-      const aiMessage: AIMessage = { role: 'assistant', content: response };
-      setMessages(prev => [...prev, aiMessage]);
+      const response = await chatWithAI(text.trim(), createAISummary(result), messages);
+      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
     } catch (err: any) {
-      setError(err.message || 'Failed to get response. Please try again.');
+      setError(err.message || 'Failed to get response.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    sendMessage(input);
-  };
-
   return (
-    <div className="min-h-screen bg-background animate-fade-in">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-text-primary">Ask AI About My Results</h1>
-          <p className="text-text-secondary text-sm mt-1">
+    <div style={{ minHeight: '100vh', background: '#f8f5ff' }} className="animate-fade-in-up">
+      <div style={{ maxWidth: '720px', margin: '0 auto', padding: '2rem 1rem' }}>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e1b3a' }}>Ask AI About My Results</h1>
+          <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.25rem' }}>
             Ask any questions about your score, symptoms or recommendations.
           </p>
         </div>
 
-        {/* Chat Area */}
-        <div className="bg-white rounded-2xl shadow-card border border-border overflow-hidden">
+        <div className="card" style={{ overflow: 'hidden' }}>
           {/* Messages */}
-          <div className="h-[400px] overflow-y-auto p-6 space-y-4">
+          <div style={{ height: '400px', overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {messages.length === 0 && (
-              <div className="flex flex-col items-center justify-center h-full text-center">
-                <div className="w-16 h-16 bg-primary-50 rounded-2xl flex items-center justify-center mb-4">
-                  <Sparkles className="w-8 h-8 text-primary-400" />
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center' }}>
+                <div style={{ width: '56px', height: '56px', background: '#f5f0ff', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                  <Sparkles style={{ width: '28px', height: '28px', color: '#a87bff' }} />
                 </div>
-                <h3 className="font-semibold text-text-primary mb-1">AI Health Assistant</h3>
-                <p className="text-sm text-text-secondary max-w-sm">
+                <h3 style={{ fontWeight: 600, color: '#1e1b3a', marginBottom: '0.25rem' }}>AI Health Assistant</h3>
+                <p style={{ fontSize: '0.8rem', color: '#6b7280', maxWidth: '320px' }}>
                   Ask questions about your PMOS screening results. I'll provide general educational information.
                 </p>
               </div>
             )}
 
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''} animate-fade-in`}
-              >
-                <div
-                  className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    msg.role === 'user'
-                      ? 'bg-primary-100'
-                      : 'bg-accent-100'
-                  }`}
-                >
-                  {msg.role === 'user' ? (
-                    <User className="w-4 h-4 text-primary-600" />
-                  ) : (
-                    <Sparkles className="w-4 h-4 text-accent-600" />
-                  )}
+            {messages.map((msg, i) => (
+              <div key={i} style={{ display: 'flex', gap: '0.75rem', flexDirection: msg.role === 'user' ? 'row-reverse' : 'row' }}>
+                <div style={{
+                  width: '32px', height: '32px', borderRadius: '10px', flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: msg.role === 'user' ? '#ede5ff' : '#fce7f3',
+                }}>
+                  {msg.role === 'user' ? <User style={{ width: '14px', height: '14px', color: '#7c3aed' }} /> : <Sparkles style={{ width: '14px', height: '14px', color: '#ec4899' }} />}
                 </div>
-                <div
-                  className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                    msg.role === 'user'
-                      ? 'bg-primary-500 text-white rounded-tr-md'
-                      : 'bg-lavender-50 text-text-primary border border-primary-100 rounded-tl-md'
-                  }`}
-                >
-                  {msg.content.split('\n').map((line, i) => (
-                    <p key={i} className={i > 0 ? 'mt-2' : ''}>{line}</p>
-                  ))}
+                <div style={{
+                  maxWidth: '75%', padding: '0.75rem 1rem', borderRadius: '1rem', fontSize: '0.85rem', lineHeight: 1.6,
+                  ...(msg.role === 'user'
+                    ? { background: '#8b5cf6', color: 'white', borderTopRightRadius: '4px' }
+                    : { background: '#f5f0ff', color: '#1e1b3a', border: '1px solid #ede5ff', borderTopLeftRadius: '4px' }),
+                }}>
+                  {msg.content.split('\n').map((line, j) => <p key={j} style={j > 0 ? { marginTop: '0.5rem' } : {}}>{line}</p>)}
                 </div>
               </div>
             ))}
 
             {loading && (
-              <div className="flex gap-3 animate-fade-in">
-                <div className="w-8 h-8 rounded-xl bg-accent-100 flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-4 h-4 text-accent-600" />
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#fce7f3', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Sparkles style={{ width: '14px', height: '14px', color: '#ec4899' }} />
                 </div>
-                <div className="px-4 py-3 bg-lavender-50 rounded-2xl rounded-tl-md border border-primary-100">
-                  <div className="flex gap-1.5">
-                    <div className="w-2 h-2 bg-primary-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="w-2 h-2 bg-primary-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <div className="w-2 h-2 bg-primary-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
+                <div style={{ padding: '0.75rem 1rem', background: '#f5f0ff', borderRadius: '1rem', borderTopLeftRadius: '4px', border: '1px solid #ede5ff', display: 'flex', gap: '6px' }}>
+                  {[0, 150, 300].map(d => <div key={d} style={{ width: '8px', height: '8px', background: '#c4abff', borderRadius: '50%', animation: `bounce 1s infinite ${d}ms` }} />)}
                 </div>
               </div>
             )}
 
             {error && (
-              <div className="flex items-center gap-2 text-sm text-error bg-red-50 px-4 py-3 rounded-xl border border-red-200">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                <span>{error}</span>
-                <button
-                  onClick={() => { setError(''); if (messages.length > 0) sendMessage(messages[messages.length - 1].content); }}
-                  className="ml-auto flex items-center gap-1 text-xs font-medium hover:text-red-700"
-                >
-                  <RefreshCw className="w-3 h-3" /> Retry
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.75rem', padding: '0.75rem 1rem' }}>
+                <AlertCircle style={{ width: '14px', height: '14px', color: '#ef4444', flexShrink: 0 }} />
+                <span style={{ fontSize: '0.8rem', color: '#991b1b', flex: 1 }}>{error}</span>
+                <button onClick={() => { setError(''); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', fontWeight: 500, color: '#991b1b', background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <RefreshCw style={{ width: '10px', height: '10px' }} /> Retry
                 </button>
               </div>
             )}
-
             <div ref={chatEndRef} />
           </div>
 
           {/* Suggested Questions */}
           {messages.length === 0 && (
-            <div className="px-6 pb-3 flex flex-wrap gap-2">
+            <div style={{ padding: '0 1.5rem 0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
               {SUGGESTED_QUESTIONS.map((q) => (
-                <button
-                  key={q}
-                  onClick={() => sendMessage(q)}
-                  className="px-3 py-1.5 text-xs font-medium text-primary-600 bg-primary-50 rounded-lg border border-primary-100 hover:bg-primary-100 transition-colors"
-                >
+                <button key={q} onClick={() => sendMessage(q)} style={{
+                  padding: '0.375rem 0.75rem', fontSize: '0.7rem', fontWeight: 500,
+                  color: '#7c3aed', background: '#f5f0ff', borderRadius: '0.5rem',
+                  border: '1px solid #ede5ff', cursor: 'pointer', transition: 'background 0.15s',
+                }}>
                   {q}
                 </button>
               ))}
@@ -172,28 +130,24 @@ export default function AskAIPage() {
           )}
 
           {/* Input */}
-          <form onSubmit={handleSubmit} className="border-t border-border p-4 flex gap-3">
+          <form onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
+            style={{ borderTop: '1px solid #e9e2f5', padding: '1rem 1.5rem', display: 'flex', gap: '0.75rem' }}>
             <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask a question..."
-              disabled={loading}
-              className="flex-1 px-4 py-3 rounded-xl border border-border bg-surface-secondary text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 disabled:opacity-50"
+              type="text" value={input} onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask a question..." disabled={loading}
+              style={{
+                flex: 1, padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #e9e2f5',
+                background: '#faf8ff', fontSize: '0.85rem', outline: 'none', opacity: loading ? 0.5 : 1,
+              }}
             />
-            <button
-              type="submit"
-              disabled={loading || !input.trim()}
-              className="px-4 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl disabled:opacity-30 hover:shadow-lg transition-all"
-              aria-label="Send message"
-            >
-              <Send className="w-4 h-4" />
+            <button type="submit" disabled={loading || !input.trim()} className="btn-primary"
+              style={{ padding: '0.75rem', opacity: (loading || !input.trim()) ? 0.3 : 1 }}>
+              <Send style={{ width: '16px', height: '16px' }} />
             </button>
           </form>
         </div>
 
-        {/* Bottom disclaimer */}
-        <p className="text-xs text-text-muted text-center mt-4">
+        <p style={{ textAlign: 'center', fontSize: '0.7rem', color: '#9ca3af', marginTop: '1rem' }}>
           AI responses are for general educational purposes only and do not constitute medical advice.
         </p>
       </div>
