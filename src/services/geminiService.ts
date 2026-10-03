@@ -5,15 +5,19 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+const MODEL_NAME = 'gemini-3.6-flash';
+
 const SYSTEM_INSTRUCTION = `You are the AI health assistant for PMOS Sense, an academic screening and educational prototype tool for PMOS (Polycystic Metabolic & Ovarian Syndrome).
 
-CRITICAL CONSTRAINTS & FORMATTING RULES:
-- Keep all responses SHORT, CLEAR, CLEAN, and directly understandable (max 150-200 words).
-- DO NOT output excessive markdown symbols or raw asterisks like "**Title**" or "*item*". Use clean, plain titles and simple bullet points using "•".
+GUIDELINES FOR RESPONSES:
+- Directly answer the user's question first.
+- Provide concise but complete answers (typically 100–180 words; up to 200–250 words for complex questions; if answerable in 50–100 words, keep it shorter).
+- Always finish naturally with a complete sentence. Never cut off mid-sentence.
+- Use short paragraphs or clean bullet points (using •) when helpful.
+- Avoid unnecessary repetition, long introductions, and excessive disclaimers.
 - NEVER diagnose PMOS or any medical condition.
 - NEVER prescribe medication or clinical treatments.
-- Use supportive, empathetic, and clear language ("may", "could", "consider").
-- State clearly that screening indicators are educational, not clinical diagnoses.`;
+- Use supportive, empathetic, and clear language ("may", "could", "consider").`;
 
 let genAI: GoogleGenerativeAI | null = null;
 
@@ -21,11 +25,32 @@ function getGenAI(): GoogleGenerativeAI {
   if (!genAI) {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     if (!apiKey || apiKey === 'your_api_key_here') {
-      throw new Error('Gemini API key is not configured. Please set VITE_GEMINI_API_KEY in your .env file.');
+      throw new Error('Gemini API key is not configured. Please add VITE_GEMINI_API_KEY to your .env file.');
     }
     genAI = new GoogleGenerativeAI(apiKey);
   }
   return genAI;
+}
+
+function handleGeminiError(error: unknown, context: string): Error {
+  const errMsg = error instanceof Error ? error.message : String(error);
+  console.error(`Gemini API error (${context}):`, error);
+
+  if (
+    errMsg.includes('503') ||
+    errMsg.includes('high demand') ||
+    errMsg.includes('overloaded') ||
+    errMsg.includes('RESOURCE_EXHAUSTED') ||
+    errMsg.includes('UNAVAILABLE')
+  ) {
+    return new Error('The AI service is currently busy or experiencing high demand. Please try again in a moment.');
+  }
+
+  if (errMsg.includes('API key') || errMsg.includes('API_KEY_INVALID')) {
+    return new Error('Invalid or unconfigured Gemini API key. Please check your .env configuration.');
+  }
+
+  return new Error('Unable to generate AI response. Please try again.');
 }
 
 export interface AIMessage {
@@ -37,28 +62,28 @@ export interface AIMessage {
 export async function explainResults(resultSummary: object): Promise<string> {
   try {
     const ai = getGenAI();
-    const model = ai.getGenerativeModel({ 
-      model: 'gemini-flash-latest',
+    const model = ai.getGenerativeModel({
+      model: MODEL_NAME,
       systemInstruction: SYSTEM_INSTRUCTION,
-      generationConfig: { maxOutputTokens: 350, temperature: 0.7 },
+      generationConfig: { maxOutputTokens: 600, temperature: 0.7 },
     });
 
-    const prompt = `Provide a concise, easy-to-read explanation (under 150 words) of these PMOS screening results. Keep formatting clean without raw asterisks:
+    const prompt = `Provide a concise, easy-to-read explanation (100–180 words) of these PMOS screening results:
 
 Screening Results:
 ${JSON.stringify(resultSummary, null, 2)}
 
 Cover:
-1. Overview of result
+1. Overview of screening result
 2. Key observed pattern
-3. Simple educational advice & medical checkup recommendation`;
+3. Educational advice & medical checkup recommendation
+
+Ensure every sentence finishes completely.`;
 
     const result = await model.generateContent(prompt);
     return result.response.text();
   } catch (error: unknown) {
-    const errMsg = error instanceof Error ? error.message : String(error);
-    console.error('Gemini API error (explainResults):', error);
-    throw new Error(`Unable to generate AI explanation: ${errMsg}`);
+    throw handleGeminiError(error, 'explainResults');
   }
 }
 
@@ -70,10 +95,10 @@ export async function chatWithAI(
 ): Promise<string> {
   try {
     const ai = getGenAI();
-    const model = ai.getGenerativeModel({ 
-      model: 'gemini-flash-latest',
+    const model = ai.getGenerativeModel({
+      model: MODEL_NAME,
       systemInstruction: SYSTEM_INSTRUCTION,
-      generationConfig: { maxOutputTokens: 300, temperature: 0.7 },
+      generationConfig: { maxOutputTokens: 650, temperature: 0.7 },
     });
 
     const historyContext = conversationHistory
@@ -85,14 +110,15 @@ export async function chatWithAI(
 ${historyContext ? `Previous Chat:\n${historyContext}\n` : ''}
 User Question: ${userMessage}
 
-Answer concisely, cleanly, and under 150 words. Avoid unnecessary formatting noise or asterisks.`;
+Instructions:
+- Directly answer the user's question first.
+- Keep the response readable, medium-length, and complete (typically 100–180 words; up to 200–250 words for complex questions).
+- End naturally with a complete sentence.`;
 
     const result = await model.generateContent(prompt);
     return result.response.text();
   } catch (error: unknown) {
-    const errMsg = error instanceof Error ? error.message : String(error);
-    console.error('Gemini API error (chatWithAI):', error);
-    throw new Error(`AI Chat Error: ${errMsg}`);
+    throw handleGeminiError(error, 'chatWithAI');
   }
 }
 
@@ -100,13 +126,13 @@ Answer concisely, cleanly, and under 150 words. Avoid unnecessary formatting noi
 export async function generateActionPlan(resultSummary: object): Promise<string> {
   try {
     const ai = getGenAI();
-    const model = ai.getGenerativeModel({ 
-      model: 'gemini-flash-latest',
+    const model = ai.getGenerativeModel({
+      model: MODEL_NAME,
       systemInstruction: SYSTEM_INSTRUCTION,
-      generationConfig: { maxOutputTokens: 400, temperature: 0.7 },
+      generationConfig: { maxOutputTokens: 650, temperature: 0.7 },
     });
 
-    const prompt = `Based on these PMOS screening results, generate a short, clean personalized action plan with simple bullet points (keep under 200 words total):
+    const prompt = `Based on these PMOS screening results, generate a concise personalized action plan (150–220 words total):
 
 Screening Results:
 ${JSON.stringify(resultSummary, null, 2)}
@@ -115,14 +141,14 @@ Organize under simple headers:
 - Menstrual & Hormonal Health
 - Nutrition & Exercise
 - Stress & Sleep Care
-- Doctor Visit Preparation`;
+- Doctor Visit Preparation
+
+Ensure every bullet point and sentence is complete.`;
 
     const result = await model.generateContent(prompt);
     return result.response.text();
   } catch (error: unknown) {
-    const errMsg = error instanceof Error ? error.message : String(error);
-    console.error('Gemini API error (generateActionPlan):', error);
-    throw new Error(`Unable to generate action plan: ${errMsg}`);
+    throw handleGeminiError(error, 'generateActionPlan');
   }
 }
 
@@ -133,13 +159,13 @@ export async function generateDoctorSummary(
 ): Promise<string> {
   try {
     const ai = getGenAI();
-    const model = ai.getGenerativeModel({ 
-      model: 'gemini-flash-latest',
+    const model = ai.getGenerativeModel({
+      model: MODEL_NAME,
       systemInstruction: SYSTEM_INSTRUCTION,
-      generationConfig: { maxOutputTokens: 350, temperature: 0.7 },
+      generationConfig: { maxOutputTokens: 600, temperature: 0.7 },
     });
 
-    const prompt = `Generate a concise, clean Doctor Discussion Summary (under 180 words) for the user to share with their doctor. Do not use raw asterisks:
+    const prompt = `Generate a concise Doctor Discussion Summary (120–180 words) for the user to share with their doctor:
 
 Screening Results:
 ${JSON.stringify(resultSummary, null, 2)}
@@ -148,14 +174,14 @@ ${cycleData ? `Cycle Data:\n${JSON.stringify(cycleData, null, 2)}` : ''}
 Include 3 simple sections:
 1. Reported Symptoms & Score Overview
 2. Key Areas to Discuss
-3. Recommended Questions for Doctor`;
+3. Recommended Questions for Doctor
+
+Ensure all sentences finish completely.`;
 
     const result = await model.generateContent(prompt);
     return result.response.text();
   } catch (error: unknown) {
-    const errMsg = error instanceof Error ? error.message : String(error);
-    console.error('Gemini API error (generateDoctorSummary):', error);
-    throw new Error(`Unable to generate doctor summary: ${errMsg}`);
+    throw handleGeminiError(error, 'generateDoctorSummary');
   }
 }
 
