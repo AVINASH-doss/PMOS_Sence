@@ -160,9 +160,9 @@ export default function ActionPlanPage() {
                   </div>
                   <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     {cat.items.map((item, j) => (
-                      <li key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', fontSize: '0.8rem', color: '#6b7280', lineHeight: 1.5 }}>
-                        <span style={{ color: '#a87bff', marginTop: '2px' }}>•</span>
-                        <span>{item}</span>
+                      <li key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', fontSize: '0.8rem', color: '#4b5563', lineHeight: 1.6 }}>
+                        <span style={{ color: '#8b5cf6', marginTop: '2px', fontWeight: 'bold' }}>•</span>
+                        <span>{item.replace(/\*\*/g, '').replace(/^[*\-•]\s*/, '')}</span>
                       </li>
                     ))}
                   </ul>

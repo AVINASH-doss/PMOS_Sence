@@ -2,29 +2,18 @@
 // PMOS Sense — Gemini AI Service
 // Generative AI layer for explanations, Q&A, recommendations
 // ============================================================
-// Gemini does NOT calculate scores.
-// It receives pre-calculated results and generates explanations.
-// Architecture allows swapping to another LLM later.
-// ============================================================
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const SYSTEM_INSTRUCTION = `You are the AI assistant for PMOS Sense, an academic screening and educational prototype tool. 
+const SYSTEM_INSTRUCTION = `You are the AI health assistant for PMOS Sense, an academic screening and educational prototype tool for PMOS (Polycystic Metabolic & Ovarian Syndrome).
 
-CRITICAL RULES:
-- This is an academic screening prototype, NOT a diagnostic tool.
+CRITICAL CONSTRAINTS & FORMATTING RULES:
+- Keep all responses SHORT, CLEAR, CLEAN, and directly understandable (max 150-200 words).
+- DO NOT output excessive markdown symbols or raw asterisks like "**Title**" or "*item*". Use clean, plain titles and simple bullet points using "•".
 - NEVER diagnose PMOS or any medical condition.
-- NEVER prescribe medication or specific treatments.
-- NEVER claim certainty about a user's health status.
-- NEVER replace healthcare professional advice.
-- Always use language like "may", "could", "consider", "it is suggested".
-- Always encourage professional medical consultation when appropriate.
-- Use the supplied questionnaire/result information to provide context.
-- Provide general educational information about PMOS-related topics.
-- Be empathetic, supportive, and professional.
-- Keep responses concise but informative.
-- When explaining scores, clarify that these are screening indicators, not diagnoses.
-- Reference that PMOS Sense uses an "Academic Prototype Weighted Screening Algorithm".`;
+- NEVER prescribe medication or clinical treatments.
+- Use supportive, empathetic, and clear language ("may", "could", "consider").
+- State clearly that screening indicators are educational, not clinical diagnoses.`;
 
 let genAI: GoogleGenerativeAI | null = null;
 
@@ -51,69 +40,59 @@ export async function explainResults(resultSummary: object): Promise<string> {
     const model = ai.getGenerativeModel({ 
       model: 'gemini-flash-latest',
       systemInstruction: SYSTEM_INSTRUCTION,
+      generationConfig: { maxOutputTokens: 350, temperature: 0.7 },
     });
 
-    const prompt = `Based on the following PMOS screening results from our academic prototype tool, provide a clear, empathetic explanation of what these results may indicate. Remember this is a screening result, NOT a diagnosis.
+    const prompt = `Provide a concise, easy-to-read explanation (under 150 words) of these PMOS screening results. Keep formatting clean without raw asterisks:
 
 Screening Results:
 ${JSON.stringify(resultSummary, null, 2)}
 
-Provide:
-1. A brief overview of the screening result
-2. Which reported patterns appear most prominent
-3. General educational context about these patterns
-4. A clear statement that this is a screening result and professional consultation is recommended
-
-Keep the response under 300 words. Use a warm, supportive tone.`;
+Cover:
+1. Overview of result
+2. Key observed pattern
+3. Simple educational advice & medical checkup recommendation`;
 
     const result = await model.generateContent(prompt);
     return result.response.text();
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : String(error);
-    console.error('Gemini API error (full details):', error);
-    console.error('API Key present:', !!import.meta.env.VITE_GEMINI_API_KEY);
-    console.error('API Key length:', import.meta.env.VITE_GEMINI_API_KEY?.length);
+    console.error('Gemini API error (explainResults):', error);
     throw new Error(`Unable to generate AI explanation: ${errMsg}`);
   }
 }
 
-/** Chat with AI about results */
+/** Chat with AI about results or general PMOS health questions */
 export async function chatWithAI(
   userMessage: string,
-  resultSummary: object,
-  conversationHistory: AIMessage[]
+  resultSummary?: object | null,
+  conversationHistory: AIMessage[] = []
 ): Promise<string> {
   try {
     const ai = getGenAI();
     const model = ai.getGenerativeModel({ 
       model: 'gemini-flash-latest',
       systemInstruction: SYSTEM_INSTRUCTION,
+      generationConfig: { maxOutputTokens: 300, temperature: 0.7 },
     });
 
     const historyContext = conversationHistory
-      .slice(-6)
+      .slice(-4)
       .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
       .join('\n');
 
-    const prompt = `The user has completed a PMOS screening assessment. Here are their results:
+    const prompt = `${resultSummary ? `User Screening Context:\n${JSON.stringify(resultSummary, null, 2)}\n` : ''}
+${historyContext ? `Previous Chat:\n${historyContext}\n` : ''}
+User Question: ${userMessage}
 
-${JSON.stringify(resultSummary, null, 2)}
-
-${historyContext ? `Previous conversation:\n${historyContext}\n` : ''}
-User's new question: ${userMessage}
-
-Provide a helpful, educational response. Remember:
-- Do not diagnose
-- Do not prescribe medication
-- Encourage professional consultation when appropriate
-- Be empathetic and supportive
-- Keep response concise (under 250 words)`;
+Answer concisely, cleanly, and under 150 words. Avoid unnecessary formatting noise or asterisks.`;
 
     const result = await model.generateContent(prompt);
     return result.response.text();
-  } catch (error) {
-    console.error('Gemini chat error:', error);
-    throw new Error('Unable to get AI response. Please try again.');
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('Gemini API error (chatWithAI):', error);
+    throw new Error(`AI Chat Error: ${errMsg}`);
   }
 }
 
@@ -124,32 +103,26 @@ export async function generateActionPlan(resultSummary: object): Promise<string>
     const model = ai.getGenerativeModel({ 
       model: 'gemini-flash-latest',
       systemInstruction: SYSTEM_INSTRUCTION,
+      generationConfig: { maxOutputTokens: 400, temperature: 0.7 },
     });
 
-    const prompt = `Based on the following PMOS screening results, generate a personalized action plan with general educational recommendations. This is NOT medical advice.
+    const prompt = `Based on these PMOS screening results, generate a short, clean personalized action plan with simple bullet points (keep under 200 words total):
 
 Screening Results:
 ${JSON.stringify(resultSummary, null, 2)}
 
-Create recommendations in these categories (use markdown formatting with ## headers):
-## Menstrual Health
-## Nutrition  
-## Physical Activity
-## Sleep & Stress
-## Skin & Hair Care
-## Regular Check-ups
-
-For each category, provide 2-3 specific, actionable general recommendations based on the user's reported patterns. Use encouraging, supportive language.
-
-IMPORTANT: These are general educational recommendations, not medical treatment instructions. Include a reminder to consult healthcare professionals.
-
-Keep each category to 2-3 bullet points. Be specific but not prescriptive.`;
+Organize under simple headers:
+- Menstrual & Hormonal Health
+- Nutrition & Exercise
+- Stress & Sleep Care
+- Doctor Visit Preparation`;
 
     const result = await model.generateContent(prompt);
     return result.response.text();
-  } catch (error) {
-    console.error('Gemini action plan error:', error);
-    throw new Error('Unable to generate action plan. Please try again.');
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('Gemini API error (generateActionPlan):', error);
+    throw new Error(`Unable to generate action plan: ${errMsg}`);
   }
 }
 
@@ -163,28 +136,26 @@ export async function generateDoctorSummary(
     const model = ai.getGenerativeModel({ 
       model: 'gemini-flash-latest',
       systemInstruction: SYSTEM_INSTRUCTION,
+      generationConfig: { maxOutputTokens: 350, temperature: 0.7 },
     });
 
-    const prompt = `Generate a professional, concise doctor discussion summary based on these PMOS screening results. This summary is designed to help the user communicate their symptoms to a healthcare professional.
+    const prompt = `Generate a concise, clean Doctor Discussion Summary (under 180 words) for the user to share with their doctor. Do not use raw asterisks:
 
 Screening Results:
 ${JSON.stringify(resultSummary, null, 2)}
+${cycleData ? `Cycle Data:\n${JSON.stringify(cycleData, null, 2)}` : ''}
 
-${cycleData ? `Cycle Tracking Data:\n${JSON.stringify(cycleData, null, 2)}` : ''}
-
-Create a structured summary with:
-1. Overview of reported symptoms
-2. Key areas of concern based on screening patterns
-3. Suggested discussion points for the healthcare appointment
-4. Questions the user might want to ask their doctor
-
-Keep it professional, factual, and under 300 words. Do not diagnose or prescribe. Frame everything as "reported symptoms" and "screening indicators".`;
+Include 3 simple sections:
+1. Reported Symptoms & Score Overview
+2. Key Areas to Discuss
+3. Recommended Questions for Doctor`;
 
     const result = await model.generateContent(prompt);
     return result.response.text();
-  } catch (error) {
-    console.error('Gemini doctor summary error:', error);
-    throw new Error('Unable to generate doctor summary. Please try again.');
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('Gemini API error (generateDoctorSummary):', error);
+    throw new Error(`Unable to generate doctor summary: ${errMsg}`);
   }
 }
 

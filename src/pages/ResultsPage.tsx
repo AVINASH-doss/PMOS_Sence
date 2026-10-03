@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { HelpCircle, ArrowRight, AlertCircle } from 'lucide-react';
 import CircularProgress from '../components/CircularProgress';
+import FormattedText from '../components/FormattedText';
 import Disclaimer from '../components/Disclaimer';
 import { type ScoringResult, createAISummary } from '../logic/scoring';
 import { explainResults, isGeminiConfigured } from '../services/geminiService';
@@ -85,7 +86,7 @@ export default function ResultsPage() {
 
           {explanation && (
             <div style={{ marginTop: '1.5rem', background: '#f5f0ff', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #ede5ff', textAlign: 'left' }}>
-              <p style={{ fontSize: '0.85rem', color: '#1e1b3a', lineHeight: 1.7, whiteSpace: 'pre-line' }}>{explanation}</p>
+              <FormattedText content={explanation} />
             </div>
           )}
           {explError && (

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Download, Printer, Loader2, AlertCircle } from 'lucide-react';
 import CircularProgress from '../components/CircularProgress';
+import FormattedText from '../components/FormattedText';
 import { type ScoringResult, createAISummary } from '../logic/scoring';
 import { generateDoctorSummary, isGeminiConfigured } from '../services/geminiService';
 import { appConfig } from '../config/appConfig';
@@ -186,7 +187,7 @@ export default function DoctorSummaryPage() {
           {aiSummary && (
             <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #e9e2f5' }}>
               <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e1b3a', marginBottom: '0.75rem' }}>AI-Generated Discussion Points</h3>
-              <p style={{ fontSize: '0.8rem', color: '#6b7280', lineHeight: 1.7, whiteSpace: 'pre-line' }}>{aiSummary}</p>
+              <FormattedText content={aiSummary} />
             </div>
           )}
 
