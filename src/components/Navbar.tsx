@@ -44,7 +44,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }} className="hidden md:flex">
+          <div style={{ alignItems: 'center', gap: '2px' }} className="hidden md:flex">
             {appConfig.navigation.map((item) => {
               const isActive = location.pathname === item.path;
               return (
@@ -128,7 +128,7 @@ export default function Navbar() {
                 onClick={closeMobile}
                 style={{
                   display: 'block',
-                  padding: '0.75rem 1rem',
+                  padding: '1rem',
                   borderRadius: '0.75rem',
                   fontSize: '0.9rem',
                   fontWeight: 500,
@@ -146,7 +146,7 @@ export default function Navbar() {
             {user ? (
               <Link to="/profile" onClick={closeMobile} style={{
                 display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.75rem 1rem', borderRadius: '0.75rem', fontSize: '0.9rem',
+                padding: '1rem', borderRadius: '0.75rem', fontSize: '0.9rem',
                 fontWeight: 500, textDecoration: 'none',
                 color: location.pathname === '/profile' ? '#6d28d9' : '#6b7280',
                 background: location.pathname === '/profile' ? '#f5f0ff' : 'transparent',
@@ -158,7 +158,7 @@ export default function Navbar() {
               <>
                 <Link to="/login" onClick={closeMobile} style={{
                   display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  padding: '0.75rem 1rem', borderRadius: '0.75rem', fontSize: '0.9rem',
+                  padding: '1rem', borderRadius: '0.75rem', fontSize: '0.9rem',
                   fontWeight: 500, textDecoration: 'none', color: '#6b7280',
                 }}>
                   <LogIn style={{ width: '16px', height: '16px' }} />
@@ -166,7 +166,7 @@ export default function Navbar() {
                 </Link>
                 <Link to="/signup" onClick={closeMobile} style={{
                   display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  padding: '0.75rem 1rem', borderRadius: '0.75rem', fontSize: '0.9rem',
+                  padding: '1rem', borderRadius: '0.75rem', fontSize: '0.9rem',
                   fontWeight: 600, textDecoration: 'none', color: '#7c3aed',
                 }}>
                   Create Account
