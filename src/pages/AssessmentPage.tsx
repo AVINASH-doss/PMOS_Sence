@@ -1,15 +1,19 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
 import { getQuestionSections } from '../config/scoringConfig';
 import { calculateScreeningScore, calculateBMI, getBMICategory, type Answers } from '../logic/scoring';
+import { useAuth } from '../context/AuthContext';
+import { saveAssessment } from '../services/databaseService';
 
 export default function AssessmentPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const sections = getQuestionSections();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [errors, setErrors] = useState<string[]>([]);
+  const [submitting, setSubmitting] = useState(false);
 
   const totalSteps = sections.length;
   const currentSection = sections[currentStep];
@@ -53,10 +57,43 @@ export default function AssessmentPage() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+
     const result = calculateScreeningScore(answers);
+    // Always store in localStorage for immediate use
     localStorage.setItem('pmos_screening_result', JSON.stringify(result));
     localStorage.setItem('pmos_answers', JSON.stringify(answers));
+
+    // If authenticated, save to Supabase
+    if (user) {
+      const menstrualScore = result.patternScores.find(p => p.label === 'menstrual')?.score ?? 0;
+      const androgenScore = result.patternScores.find(p => p.label === 'androgen')?.score ?? 0;
+      const metabolicScore = result.patternScores.find(p => p.label === 'metabolic')?.score ?? 0;
+      const lifestyleScore = result.patternScores.find(p => p.label === 'lifestyle')?.score ?? 0;
+
+      await saveAssessment({
+        user_id: user.id,
+        answers: result.answers,
+        overall_score: result.overallScore,
+        risk_range: result.riskRange.label,
+        menstrual_score: menstrualScore,
+        androgen_score: androgenScore,
+        metabolic_score: metabolicScore,
+        lifestyle_score: lifestyleScore,
+        bmi: result.bmi,
+        bmi_category: result.bmiCategory || null,
+        pattern_scores: result.patternScores.map(p => ({
+          category: p.category, label: p.label, score: p.score, patternLabel: p.patternLabel,
+        })),
+        contributing_factors: result.contributingFactors.map(f => ({
+          questionText: f.questionText, userAnswer: f.userAnswer, impact: f.impact,
+        })),
+      });
+    }
+
+    setSubmitting(false);
     navigate('/results');
   };
 
@@ -94,7 +131,7 @@ export default function AssessmentPage() {
 
         {/* Section Title */}
         <div style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e1b3a', marginBottom: '0.25rem' }}>
+          <h1 style={{ fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', fontWeight: 700, color: '#1e1b3a', marginBottom: '0.25rem' }}>
             {currentSection.label}
           </h1>
           <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>
@@ -111,7 +148,7 @@ export default function AssessmentPage() {
                 key={question.id}
                 className="card"
                 style={{
-                  padding: '1.5rem',
+                  padding: 'clamp(1rem, 3vw, 1.5rem)',
                   borderColor: hasError ? '#ef4444' : undefined,
                 }}
               >
@@ -139,6 +176,7 @@ export default function AssessmentPage() {
                         background: '#faf8ff', fontSize: '0.9rem',
                         outline: 'none', color: '#1e1b3a',
                         transition: 'border-color 0.2s',
+                        boxSizing: 'border-box',
                       }}
                       onFocus={(e) => e.target.style.borderColor = '#8b5cf6'}
                       onBlur={(e) => e.target.style.borderColor = '#e9e2f5'}
@@ -150,7 +188,7 @@ export default function AssessmentPage() {
                 )}
 
                 {question.type === 'radio' && question.options && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.625rem' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                     {question.options.map((option) => {
                       const isSelected = String(answers[question.id]) === option.value;
                       return (
@@ -159,9 +197,9 @@ export default function AssessmentPage() {
                           type="button"
                           onClick={() => handleAnswer(question.id, option.value)}
                           style={{
-                            padding: '0.625rem 1.125rem',
+                            padding: '0.625rem 1rem',
                             borderRadius: '0.75rem',
-                            fontSize: '0.85rem',
+                            fontSize: '0.825rem',
                             fontWeight: 500,
                             border: isSelected ? '2px solid #8b5cf6' : '1.5px solid #e9e2f5',
                             background: isSelected ? '#8b5cf6' : 'white',
@@ -169,6 +207,7 @@ export default function AssessmentPage() {
                             cursor: 'pointer',
                             transition: 'all 0.15s',
                             boxShadow: isSelected ? '0 2px 8px rgba(139,92,246,0.25)' : 'none',
+                            flexShrink: 0,
                           }}
                         >
                           {option.label}
@@ -208,6 +247,7 @@ export default function AssessmentPage() {
         <div style={{
           display: 'flex', justifyContent: 'space-between',
           marginTop: '2rem', paddingBottom: '2rem',
+          gap: '0.75rem',
         }}>
           <button
             onClick={handlePrevious}
@@ -218,9 +258,14 @@ export default function AssessmentPage() {
             <ArrowLeft style={{ width: '16px', height: '16px' }} />
             Previous
           </button>
-          <button onClick={handleNext} className="btn-primary">
-            {currentStep === totalSteps - 1 ? 'Get Results' : 'Next'}
-            <ArrowRight style={{ width: '16px', height: '16px' }} />
+          <button onClick={handleNext} disabled={submitting} className="btn-primary" style={{ opacity: submitting ? 0.6 : 1 }}>
+            {submitting ? (
+              <><Loader2 style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }} /> Saving...</>
+            ) : currentStep === totalSteps - 1 ? (
+              <>Get Results <ArrowRight style={{ width: '16px', height: '16px' }} /></>
+            ) : (
+              <>Next <ArrowRight style={{ width: '16px', height: '16px' }} /></>
+            )}
           </button>
         </div>
       </div>

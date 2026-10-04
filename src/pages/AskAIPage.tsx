@@ -24,7 +24,7 @@ export default function AskAIPage() {
     if (stored) {
       try {
         setResult(JSON.parse(stored));
-      } catch {}
+      } catch { /* empty */ }
     }
   }, []);
 
@@ -34,6 +34,7 @@ export default function AskAIPage() {
 
   const sendMessage = async (text: string) => {
     if (!text.trim()) return;
+    if (loading) return;
     if (!isGeminiConfigured()) {
       setError('Gemini API key is not configured. Please add VITE_GEMINI_API_KEY to your .env file.');
       return;
@@ -62,7 +63,7 @@ export default function AskAIPage() {
     <div style={{ minHeight: '100vh', background: '#f8f5ff' }} className="animate-fade-in-up">
       <div style={{ maxWidth: '720px', margin: '0 auto', padding: '2rem 1rem' }}>
         <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: '#1e1b3a' }}>Ask AI Assistant</h1>
+          <h1 style={{ fontSize: 'clamp(1.25rem, 4vw, 1.6rem)', fontWeight: 700, color: '#1e1b3a' }}>Ask AI Assistant</h1>
           <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.25rem' }}>
             Get quick, clear educational answers about PMOS, symptoms, and health advice.
           </p>
@@ -70,7 +71,10 @@ export default function AskAIPage() {
 
         <div className="card" style={{ overflow: 'hidden' }}>
           {/* Messages container */}
-          <div style={{ height: '420px', overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{
+            height: 'clamp(300px, 50vh, 420px)', overflowY: 'auto', padding: 'clamp(0.75rem, 2vw, 1.25rem)',
+            display: 'flex', flexDirection: 'column', gap: '1rem',
+          }}>
             {messages.length === 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center' }}>
                 <div style={{ width: '52px', height: '52px', background: '#f5f0ff', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
@@ -86,17 +90,18 @@ export default function AskAIPage() {
             )}
 
             {messages.map((msg, i) => (
-              <div key={i} style={{ display: 'flex', gap: '0.75rem', flexDirection: msg.role === 'user' ? 'row-reverse' : 'row' }}>
+              <div key={i} style={{ display: 'flex', gap: '0.5rem', flexDirection: msg.role === 'user' ? 'row-reverse' : 'row', alignItems: 'flex-start' }}>
                 <div style={{
-                  width: '32px', height: '32px', borderRadius: '10px', flexShrink: 0,
+                  width: '28px', height: '28px', borderRadius: '8px', flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: msg.role === 'user' ? '#7c3aed' : '#f3e8ff',
                   color: msg.role === 'user' ? 'white' : '#7c3aed',
                 }}>
-                  {msg.role === 'user' ? <User style={{ width: '15px', height: '15px' }} /> : <Sparkles style={{ width: '15px', height: '15px' }} />}
+                  {msg.role === 'user' ? <User style={{ width: '13px', height: '13px' }} /> : <Sparkles style={{ width: '13px', height: '13px' }} />}
                 </div>
                 <div style={{
-                  maxWidth: '80%', padding: '0.75rem 1rem', borderRadius: '1rem',
+                  maxWidth: 'min(80%, calc(100% - 40px))', padding: '0.75rem 1rem', borderRadius: '1rem',
+                  overflowWrap: 'break-word', wordBreak: 'break-word', minWidth: 0,
                   ...(msg.role === 'user'
                     ? { background: '#7c3aed', color: 'white', borderTopRightRadius: '4px' }
                     : { background: '#f8fafc', color: '#1e1b3a', border: '1px solid #e2e8f0', borderTopLeftRadius: '4px' }),
@@ -111,9 +116,9 @@ export default function AskAIPage() {
             ))}
 
             {loading && (
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#f3e8ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Sparkles style={{ width: '15px', height: '15px', color: '#7c3aed' }} />
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: '#f3e8ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Sparkles style={{ width: '13px', height: '13px', color: '#7c3aed' }} />
                 </div>
                 <div style={{ padding: '0.75rem 1rem', background: '#f8fafc', borderRadius: '1rem', borderTopLeftRadius: '4px', border: '1px solid #e2e8f0', display: 'flex', gap: '6px' }}>
                   {[0, 150, 300].map(d => <div key={d} style={{ width: '8px', height: '8px', background: '#a855f7', borderRadius: '50%', animation: `bounce 1s infinite ${d}ms` }} />)}
@@ -124,8 +129,8 @@ export default function AskAIPage() {
             {error && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.75rem', padding: '0.75rem 1rem' }}>
                 <AlertCircle style={{ width: '16px', height: '16px', color: '#ef4444', flexShrink: 0 }} />
-                <span style={{ fontSize: '0.8rem', color: '#991b1b', flex: 1 }}>{error}</span>
-                <button onClick={() => setError('')} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: 600, color: '#991b1b', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <span style={{ fontSize: '0.8rem', color: '#991b1b', flex: 1, overflowWrap: 'break-word' }}>{error}</span>
+                <button onClick={() => setError('')} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: 600, color: '#991b1b', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
                   <RefreshCw style={{ width: '12px', height: '12px' }} /> Clear
                 </button>
               </div>
@@ -135,10 +140,10 @@ export default function AskAIPage() {
 
           {/* Suggested Questions */}
           {messages.length === 0 && (
-            <div style={{ padding: '0 1.25rem 0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ padding: '0 clamp(0.75rem, 2vw, 1.25rem) 0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
               {SUGGESTED_QUESTIONS.map((q) => (
                 <button key={q} onClick={() => sendMessage(q)} style={{
-                  padding: '0.4rem 0.8rem', fontSize: '0.75rem', fontWeight: 500,
+                  padding: '0.4rem 0.8rem', fontSize: '0.7rem', fontWeight: 500,
                   color: '#6d28d9', background: '#f5f0ff', borderRadius: '0.5rem',
                   border: '1px solid #ede5ff', cursor: 'pointer', transition: 'all 0.15s ease',
                 }}>
@@ -150,17 +155,18 @@ export default function AskAIPage() {
 
           {/* Input Form */}
           <form onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
-            style={{ borderTop: '1px solid #e9e2f5', padding: '1rem 1.25rem', display: 'flex', gap: '0.75rem' }}>
+            style={{ borderTop: '1px solid #e9e2f5', padding: 'clamp(0.75rem, 2vw, 1rem) clamp(0.75rem, 2vw, 1.25rem)', display: 'flex', gap: '0.5rem' }}>
             <input
               type="text" value={input} onChange={(e) => setInput(e.target.value)}
               placeholder="Ask a question about PMOS..." disabled={loading}
               style={{
                 flex: 1, padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0',
                 background: '#faf8ff', fontSize: '0.85rem', outline: 'none', opacity: loading ? 0.6 : 1,
+                minWidth: 0, boxSizing: 'border-box',
               }}
             />
             <button type="submit" disabled={loading || !input.trim()} className="btn-primary"
-              style={{ padding: '0.75rem 1.25rem', opacity: (loading || !input.trim()) ? 0.4 : 1, borderRadius: '0.75rem' }}>
+              style={{ padding: '0.75rem 1rem', opacity: (loading || !input.trim()) ? 0.4 : 1, borderRadius: '0.75rem', flexShrink: 0 }}>
               <Send style={{ width: '16px', height: '16px' }} />
             </button>
           </form>

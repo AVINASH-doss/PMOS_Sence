@@ -16,11 +16,11 @@ export default function HomePage() {
         <div style={{ position: 'absolute', top: '-160px', right: '-160px', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%)', borderRadius: '50%' }} />
         <div style={{ position: 'absolute', bottom: '-160px', left: '-160px', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(236,72,153,0.06) 0%, transparent 70%)', borderRadius: '50%' }} />
 
-        <div className="section-container" style={{ position: 'relative', paddingTop: '4rem', paddingBottom: '4rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '3rem', alignItems: 'center' }} className="lg:!grid-cols-2">
+        <div className="section-container" style={{ position: 'relative', paddingTop: 'clamp(2.5rem, 6vw, 4rem)', paddingBottom: 'clamp(2.5rem, 6vw, 4rem)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', alignItems: 'center' }} className="lg:!grid-cols-2 lg:!gap-12">
             {/* Text Side */}
-            <div style={{ textAlign: 'left' }}>
-              <h1 style={{ fontSize: 'clamp(2.25rem, 5vw, 3.5rem)', fontWeight: 800, lineHeight: 1.1, marginBottom: '1.5rem' }}>
+            <div style={{ textAlign: 'center' }} className="lg:!text-left">
+              <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, lineHeight: 1.1, marginBottom: '1.5rem' }}>
                 <span style={{ display: 'block', background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                   Understand Your
                 </span>
@@ -28,10 +28,10 @@ export default function HomePage() {
                   PMOS Risk Earlier.
                 </span>
               </h1>
-              <p style={{ fontSize: '1.05rem', color: '#6b7280', lineHeight: 1.7, maxWidth: '520px', marginBottom: '2rem' }}>
+              <p style={{ fontSize: 'clamp(0.9rem, 2vw, 1.05rem)', color: '#6b7280', lineHeight: 1.7, maxWidth: '520px', marginBottom: '2rem', marginLeft: 'auto', marginRight: 'auto' }} className="lg:!ml-0">
                 {appConfig.heroSubtitle}
               </p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center' }} className="lg:!justify-start">
                 <Link to="/assessment" className="btn-primary">
                   Start Risk Assessment
                   <ArrowRight style={{ width: '16px', height: '16px' }} />
@@ -85,26 +85,26 @@ export default function HomePage() {
       </section>
 
       {/* ======== FEATURE CARDS ======== */}
-      <section id="how-it-works" className="section-container" style={{ paddingTop: '4rem', paddingBottom: '2rem' }}>
+      <section id="how-it-works" className="section-container" style={{ paddingTop: 'clamp(2.5rem, 6vw, 4rem)', paddingBottom: '2rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e1b3a' }}>How PMOS Sense Works</h2>
+          <h2 style={{ fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', fontWeight: 700, color: '#1e1b3a' }}>How PMOS Sense Works</h2>
           <p style={{ color: '#6b7280', marginTop: '0.5rem', fontSize: '0.95rem' }}>Three steps to understand your PMOS risk profile</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.25rem' }} className="sm:!grid-cols-2 lg:!grid-cols-3">
           {[
             { icon: Activity, title: 'Menstrual Pattern Analysis', desc: 'Track and analyse your cycle pattern.', bg: '#f5f0ff', iconColor: '#7c3aed' },
             { icon: Brain, title: 'Explainable AI Risk Assessment', desc: 'Understand your results with clear explanations.', bg: '#fdf2f8', iconColor: '#ec4899' },
             { icon: PieChart, title: 'Personalised PMOS Pattern Map', desc: 'Get recommendations based on your unique symptom pattern.', bg: '#f0eaff', iconColor: '#8b5cf6' },
           ].map((feature, i) => (
-            <div key={i} className="card" style={{ padding: '1.5rem', cursor: 'default' }}>
+            <div key={i} className="card" style={{ padding: 'clamp(1.25rem, 3vw, 1.5rem)', cursor: 'default' }}>
               <div style={{
-                width: '52px', height: '52px', background: feature.bg, borderRadius: '14px',
+                width: '48px', height: '48px', background: feature.bg, borderRadius: '14px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem',
               }}>
-                <feature.icon style={{ width: '26px', height: '26px', color: feature.iconColor }} />
+                <feature.icon style={{ width: '24px', height: '24px', color: feature.iconColor }} />
               </div>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: '#1e1b3a', marginBottom: '0.5rem' }}>{feature.title}</h3>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e1b3a', marginBottom: '0.5rem' }}>{feature.title}</h3>
               <p style={{ fontSize: '0.875rem', color: '#6b7280', lineHeight: 1.6 }}>{feature.desc}</p>
             </div>
           ))}
@@ -112,12 +112,12 @@ export default function HomePage() {
       </section>
 
       {/* ======== STEPS ======== */}
-      <section style={{ background: 'white', padding: '4rem 0' }}>
+      <section style={{ background: 'white', padding: 'clamp(2.5rem, 6vw, 4rem) 0' }}>
         <div className="section-container">
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e1b3a' }}>Your Screening Journey</h2>
+            <h2 style={{ fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', fontWeight: 700, color: '#1e1b3a' }}>Your Screening Journey</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }} className="md:!grid-cols-4">
             {[
               { step: '1', title: 'Complete Assessment', desc: 'Answer 27 questions about your health patterns' },
               { step: '2', title: 'Get Your Score', desc: 'Receive your PMOS screening score and pattern map' },
@@ -126,17 +126,17 @@ export default function HomePage() {
             ].map((item, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
                 <div style={{
-                  width: '48px', height: '48px', margin: '0 auto 1rem',
+                  width: '44px', height: '44px', margin: '0 auto 0.75rem',
                   background: 'linear-gradient(135deg, #8b5cf6, #ec4899)',
                   borderRadius: '14px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: 'white', fontWeight: 700, fontSize: '1.1rem',
+                  color: 'white', fontWeight: 700, fontSize: '1rem',
                   boxShadow: '0 4px 12px rgba(139,92,246,0.25)'
                 }}>
                   {item.step}
                 </div>
-                <h3 style={{ fontWeight: 600, color: '#1e1b3a', marginBottom: '0.25rem', fontSize: '0.95rem' }}>{item.title}</h3>
-                <p style={{ fontSize: '0.8rem', color: '#6b7280', lineHeight: 1.5 }}>{item.desc}</p>
+                <h3 style={{ fontWeight: 600, color: '#1e1b3a', marginBottom: '0.25rem', fontSize: '0.9rem' }}>{item.title}</h3>
+                <p style={{ fontSize: '0.75rem', color: '#6b7280', lineHeight: 1.5 }}>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -148,12 +148,12 @@ export default function HomePage() {
         <div style={{
           background: 'linear-gradient(135deg, #7c3aed, #ec4899)',
           borderRadius: '1.5rem',
-          padding: '3rem 2rem',
+          padding: 'clamp(2rem, 5vw, 3rem) clamp(1.5rem, 4vw, 2rem)',
           textAlign: 'center',
           color: 'white',
           boxShadow: '0 10px 40px rgba(124,58,237,0.2)'
         }}>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '1rem' }}>Ready to Start?</h2>
+          <h2 style={{ fontSize: 'clamp(1.25rem, 4vw, 1.75rem)', fontWeight: 700, marginBottom: '1rem' }}>Ready to Start?</h2>
           <p style={{ opacity: 0.9, maxWidth: '500px', margin: '0 auto 2rem', fontSize: '0.95rem', lineHeight: 1.6 }}>
             Take the first step towards understanding your PMOS risk. Our AI-assisted screening takes approximately 5 minutes.
           </p>

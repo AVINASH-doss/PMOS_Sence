@@ -9,6 +9,9 @@ import AskAIPage from './pages/AskAIPage';
 import ActionPlanPage from './pages/ActionPlanPage';
 import DoctorSummaryPage from './pages/DoctorSummaryPage';
 import AboutPage from './pages/AboutPage';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import ProfilePage from './pages/ProfilePage';
 
 export default function App() {
   return (
@@ -24,6 +27,9 @@ export default function App() {
           <Route path="/action-plan" element={<ActionPlanPage />} />
           <Route path="/doctor-summary" element={<DoctorSummaryPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </main>
       <Footer />

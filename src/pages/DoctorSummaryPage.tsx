@@ -10,7 +10,7 @@ import { appConfig } from '../config/appConfig';
 export default function DoctorSummaryPage() {
   const navigate = useNavigate();
   const [result, setResult] = useState<ScoringResult | null>(null);
-  const [cycleStats, setCycleStats] = useState<any>(null);
+  const [cycleStats, setCycleStats] = useState<Record<string, unknown> | null>(null);
   const [aiSummary, setAiSummary] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -21,11 +21,12 @@ export default function DoctorSummaryPage() {
     if (!stored) { navigate('/assessment'); return; }
     try { setResult(JSON.parse(stored)); } catch { navigate('/assessment'); }
     const cycleData = localStorage.getItem('pmos_cycle_stats');
-    if (cycleData) try { setCycleStats(JSON.parse(cycleData)); } catch {}
+    if (cycleData) try { setCycleStats(JSON.parse(cycleData)); } catch { /* empty */ }
   }, [navigate]);
 
   const handleGenerateSummary = async () => {
     if (!result) return;
+    if (loading) return;
     if (!isGeminiConfigured()) {
       setError('Gemini API key not configured. Showing data-only summary.');
       return;
@@ -34,8 +35,9 @@ export default function DoctorSummaryPage() {
     try {
       const text = await generateDoctorSummary(createAISummary(result), cycleStats || undefined);
       setAiSummary(text);
-    } catch (err: any) {
-      setError(err.message || 'Failed to generate summary.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to generate summary.';
+      setError(msg);
     } finally { setLoading(false); }
   };
 
@@ -65,32 +67,34 @@ export default function DoctorSummaryPage() {
       <div style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem 1rem' }}>
 
         {/* Header */}
-        <div className="no-print" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '2rem' }}>
-          <div>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e1b3a' }}>My Doctor Discussion Summary</h1>
-            <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.25rem' }}>
-              A simple summary of your responses to help you discuss with a healthcare professional.
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button onClick={handleDownloadPDF} className="btn-primary" style={{ padding: '0.625rem 1rem', fontSize: '0.8rem' }}>
-              <Download style={{ width: '16px', height: '16px' }} /> Download PDF
-            </button>
-            <button onClick={handlePrint} className="btn-secondary" style={{ padding: '0.625rem 1rem', fontSize: '0.8rem' }}>
-              <Printer style={{ width: '16px', height: '16px' }} /> Print
-            </button>
+        <div className="no-print" style={{ marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <div>
+              <h1 style={{ fontSize: 'clamp(1.15rem, 4vw, 1.5rem)', fontWeight: 700, color: '#1e1b3a' }}>My Doctor Discussion Summary</h1>
+              <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                A simple summary of your responses to help you discuss with a healthcare professional.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button onClick={handleDownloadPDF} className="btn-primary" style={{ padding: '0.625rem 1rem', fontSize: '0.8rem' }}>
+                <Download style={{ width: '16px', height: '16px' }} /> PDF
+              </button>
+              <button onClick={handlePrint} className="btn-secondary" style={{ padding: '0.625rem 1rem', fontSize: '0.8rem' }}>
+                <Printer style={{ width: '16px', height: '16px' }} /> Print
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Summary Content */}
-        <div ref={printRef} className="card" style={{ padding: '2rem' }}>
+        <div ref={printRef} className="card" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)' }}>
           {/* Title */}
-          <div style={{ textAlign: 'center', marginBottom: '2rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e9e2f5' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#6d28d9' }}>{appConfig.name}</h2>
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid #e9e2f5' }}>
+            <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#6d28d9' }}>{appConfig.name}</h2>
             <p style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: '0.25rem' }}>Doctor Discussion Summary</p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }} className="md:!grid-cols-3">
             {/* Column 1 */}
             <div>
               <SectionTitle>Basic Information</SectionTitle>
@@ -101,10 +105,10 @@ export default function DoctorSummaryPage() {
               <InfoRow label="Age at first period" value={`${answers.firstMenstruation} years`} />
 
               {cycleStats && (
-                <div style={{ marginTop: '1.5rem' }}>
+                <div style={{ marginTop: '1.25rem' }}>
                   <SectionTitle>Menstrual Summary</SectionTitle>
-                  <InfoRow label="Average cycle length" value={`${cycleStats.averageCycleLength} days`} />
-                  <InfoRow label="Cycle variability" value={cycleStats.variability} />
+                  <InfoRow label="Avg cycle length" value={`${cycleStats.averageCycleLength} days`} />
+                  <InfoRow label="Cycle variability" value={String(cycleStats.variability)} />
                   <InfoRow label="Missed periods" value={String(cycleStats.missedPeriods)} />
                 </div>
               )}
@@ -116,13 +120,15 @@ export default function DoctorSummaryPage() {
               <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
                 {highFactors.slice(0, 6).map((f, i) => (
                   <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', fontSize: '0.8rem', color: '#6b7280' }}>
-                    <span style={{ color: '#8b5cf6', marginTop: '2px' }}>•</span>
-                    {f.questionText.replace(/^(Do you have |Have you experienced |Do you |Have you been told that you have |Is your |Are your )/i, '').replace('?', '')}
+                    <span style={{ color: '#8b5cf6', marginTop: '2px', flexShrink: 0 }}>•</span>
+                    <span style={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}>
+                      {f.questionText.replace(/^(Do you have |Have you experienced |Do you |Have you been told that you have |Is your |Are your )/i, '').replace('?', '')}
+                    </span>
                   </li>
                 ))}
               </ul>
 
-              <div style={{ marginTop: '1.5rem' }}>
+              <div style={{ marginTop: '1.25rem' }}>
                 <SectionTitle>Lifestyle Factors</SectionTitle>
                 <InfoRow label="Sleep" value={getAnswerLabel(answers.sleepHours)} />
                 <InfoRow label="Exercise" value={getAnswerLabel(answers.exercise)} />
@@ -136,7 +142,7 @@ export default function DoctorSummaryPage() {
             <div>
               <SectionTitle>PMOS Screening Score</SectionTitle>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                <CircularProgress value={result.overallScore} size={100} strokeWidth={7} />
+                <CircularProgress value={result.overallScore} size={90} strokeWidth={7} />
               </div>
               <p style={{
                 textAlign: 'center', fontSize: '0.7rem', fontWeight: 600,
@@ -147,7 +153,7 @@ export default function DoctorSummaryPage() {
                 {result.riskRange.label}
               </p>
 
-              <div style={{ marginTop: '1.5rem' }}>
+              <div style={{ marginTop: '1.25rem' }}>
                 <SectionTitle>Pattern Scores</SectionTitle>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {result.patternScores.map(p => (
@@ -185,7 +191,7 @@ export default function DoctorSummaryPage() {
           )}
 
           {aiSummary && (
-            <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #e9e2f5' }}>
+            <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #e9e2f5', overflowWrap: 'break-word', wordBreak: 'break-word' }}>
               <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e1b3a', marginBottom: '0.75rem' }}>AI-Generated Discussion Points</h3>
               <FormattedText content={aiSummary} />
             </div>
@@ -212,14 +218,14 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.375rem', fontSize: '0.8rem' }}>
-      <span style={{ color: '#9ca3af' }}>{label}</span>
-      <span style={{ fontWeight: 500, color: '#1e1b3a' }}>{value}</span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.375rem', fontSize: '0.8rem', gap: '0.5rem' }}>
+      <span style={{ color: '#9ca3af', flexShrink: 0 }}>{label}</span>
+      <span style={{ fontWeight: 500, color: '#1e1b3a', textAlign: 'right', overflowWrap: 'break-word', wordBreak: 'break-word' }}>{value}</span>
     </div>
   );
 }
 
-function getAnswerLabel(value: any): string {
+function getAnswerLabel(value: string | number | undefined): string {
   const labels: Record<string, string> = {
     'less5': 'Less than 5h', '5-6': '5–6 hours', '7-8': '7–8 hours', 'more8': 'More than 8h',
     'daily': 'Daily', '3-5': '3–5 times/week', '1-2': '1–2 times/week', 'rarely': 'Rarely',

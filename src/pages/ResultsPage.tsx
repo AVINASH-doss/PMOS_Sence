@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { HelpCircle, ArrowRight, AlertCircle } from 'lucide-react';
+import { HelpCircle, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import CircularProgress from '../components/CircularProgress';
 import FormattedText from '../components/FormattedText';
 import Disclaimer from '../components/Disclaimer';
@@ -32,8 +32,9 @@ export default function ResultsPage() {
     try {
       const text = await explainResults(createAISummary(result));
       setExplanation(text);
-    } catch (err: any) {
-      setExplError(err.message || 'Failed to generate explanation.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to generate explanation.';
+      setExplError(msg);
     } finally {
       setExplLoading(false);
     }
@@ -46,15 +47,15 @@ export default function ResultsPage() {
       <div style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem 1rem' }}>
 
         {/* ======== Overall Score ======== */}
-        <div className="card" style={{ padding: '2.5rem 2rem', marginBottom: '1.5rem', textAlign: 'center' }}>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e1b3a', marginBottom: '2rem' }}>
+        <div className="card" style={{ padding: 'clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem)', marginBottom: '1.5rem', textAlign: 'center' }}>
+          <h1 style={{ fontSize: 'clamp(1.15rem, 4vw, 1.5rem)', fontWeight: 700, color: '#1e1b3a', marginBottom: '1.5rem' }}>
             Your PMOS Screening Score
           </h1>
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}
                className="md:!flex-row md:!justify-center md:!gap-12">
             <div className="animate-pulse-glow" style={{ borderRadius: '50%' }}>
-              <CircularProgress value={result.overallScore} size={160} strokeWidth={10} showPercent={true} />
+              <CircularProgress value={result.overallScore} size={140} strokeWidth={10} showPercent={true} />
             </div>
 
             <div style={{ textAlign: 'center', maxWidth: '380px' }} className="md:!text-left">
@@ -78,14 +79,17 @@ export default function ResultsPage() {
                   cursor: 'pointer', opacity: explLoading ? 0.5 : 1,
                 }}
               >
-                <HelpCircle style={{ width: '14px', height: '14px' }} />
-                {explLoading ? 'Analyzing...' : 'What does this mean?'}
+                {explLoading ? (
+                  <><Loader2 style={{ width: '14px', height: '14px', animation: 'spin 1s linear infinite' }} /> Analyzing...</>
+                ) : (
+                  <><HelpCircle style={{ width: '14px', height: '14px' }} /> What does this mean?</>
+                )}
               </button>
             </div>
           </div>
 
           {explanation && (
-            <div style={{ marginTop: '1.5rem', background: '#f5f0ff', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #ede5ff', textAlign: 'left' }}>
+            <div style={{ marginTop: '1.5rem', background: '#f5f0ff', borderRadius: '1rem', padding: 'clamp(1rem, 3vw, 1.25rem)', border: '1px solid #ede5ff', textAlign: 'left', overflowWrap: 'break-word', wordBreak: 'break-word' }}>
               <FormattedText content={explanation} />
             </div>
           )}
@@ -98,18 +102,18 @@ export default function ResultsPage() {
         </div>
 
         {/* ======== Pattern Map ======== */}
-        <div className="card" style={{ padding: '2rem', marginBottom: '1.5rem', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1e1b3a', marginBottom: '2rem' }}>
+        <div className="card" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)', marginBottom: '1.5rem', textAlign: 'center' }}>
+          <h2 style={{ fontSize: 'clamp(1.05rem, 3.5vw, 1.25rem)', fontWeight: 700, color: '#1e1b3a', marginBottom: '1.5rem' }}>
             Your PMOS Pattern Map
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1.5rem', justifyItems: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '1rem', justifyItems: 'center' }}>
             {result.patternScores.map((pattern) => (
               <div key={pattern.label} style={{ textAlign: 'center' }}>
-                <CircularProgress value={pattern.score} size={100} strokeWidth={7} showPercent={false} color={pattern.color} />
-                <p style={{ fontSize: '0.8rem', fontWeight: 600, color: '#1e1b3a', marginTop: '0.5rem' }}>{pattern.category}</p>
+                <CircularProgress value={pattern.score} size={90} strokeWidth={7} showPercent={false} color={pattern.color} />
+                <p style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1e1b3a', marginTop: '0.5rem' }}>{pattern.category}</p>
                 <span style={{
-                  display: 'inline-block', marginTop: '0.25rem', padding: '0.125rem 0.625rem',
-                  borderRadius: '9999px', fontSize: '0.7rem', fontWeight: 500,
+                  display: 'inline-block', marginTop: '0.25rem', padding: '0.125rem 0.5rem',
+                  borderRadius: '9999px', fontSize: '0.65rem', fontWeight: 500,
                   background: pattern.color + '18', color: pattern.color,
                 }}>
                   {pattern.patternLabel}
@@ -120,26 +124,26 @@ export default function ResultsPage() {
         </div>
 
         {/* ======== Contributing Factors ======== */}
-        <div className="card" style={{ padding: '2rem', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#1e1b3a', marginBottom: '0.5rem' }}>
+        <div className="card" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)', marginBottom: '1.5rem' }}>
+          <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#1e1b3a', marginBottom: '0.5rem' }}>
             Main Contributing Responses
           </h2>
-          <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '1.5rem' }}>
+          <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '1.25rem' }}>
             These reported factors contributed most to your screening result.
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
             {result.contributingFactors
               .filter(f => f.impact === 'high')
               .slice(0, 8)
               .map((factor, i) => (
                 <div key={i} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
-                  padding: '1rem', background: '#f5f0ff', borderRadius: '1rem', border: '1px solid #ede5ff', textAlign: 'center',
+                  padding: '0.875rem', background: '#f5f0ff', borderRadius: '1rem', border: '1px solid #ede5ff', textAlign: 'center',
                 }}>
-                  <div style={{ width: '36px', height: '36px', background: '#ede5ff', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <AlertCircle style={{ width: '18px', height: '18px', color: '#7c3aed' }} />
+                  <div style={{ width: '32px', height: '32px', background: '#ede5ff', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <AlertCircle style={{ width: '16px', height: '16px', color: '#7c3aed' }} />
                   </div>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 500, color: '#1e1b3a', lineHeight: 1.3 }}>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 500, color: '#1e1b3a', lineHeight: 1.3, overflowWrap: 'break-word', wordBreak: 'break-word' }}>
                     {factor.questionText.replace(/^(Do you have |Have you experienced |Do you |Have you been told that you have |Is your |Are your )/i, '').replace('?', '')}
                   </span>
                 </div>
@@ -148,7 +152,7 @@ export default function ResultsPage() {
         </div>
 
         {/* ======== Action Buttons ======== */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem', marginBottom: '1.5rem' }} className="sm:!grid-cols-3">
           <Link to="/action-plan" className="btn-primary" style={{ justifyContent: 'center', padding: '1rem 1.5rem' }}>
             View Action Plan <ArrowRight style={{ width: '16px', height: '16px' }} />
           </Link>

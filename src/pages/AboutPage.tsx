@@ -8,18 +8,18 @@ export default function AboutPage() {
       <div style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem 1rem' }}>
 
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1e1b3a' }}>About the Project</h1>
-          <p style={{ fontSize: '1.05rem', color: '#6b7280', marginTop: '0.5rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <h1 style={{ fontSize: 'clamp(1.35rem, 4vw, 1.75rem)', fontWeight: 700, color: '#1e1b3a' }}>About the Project</h1>
+          <p style={{ fontSize: 'clamp(0.9rem, 2.5vw, 1.05rem)', color: '#6b7280', marginTop: '0.5rem' }}>
             Development of an AI-Assisted Early PMOS Risk Detector
           </p>
         </div>
 
         {/* Problem & Solution */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
-          <div className="card" style={{ padding: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.25rem', marginBottom: '1.5rem' }} className="sm:!grid-cols-2">
+          <div className="card" style={{ padding: 'clamp(1.25rem, 3vw, 1.5rem)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-              <div style={{ width: '40px', height: '40px', background: '#fef2f2', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '40px', height: '40px', background: '#fef2f2', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <AlertTriangle style={{ width: '20px', height: '20px', color: '#ef4444' }} />
               </div>
               <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e1b3a' }}>Problem</h2>
@@ -31,9 +31,9 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="card" style={{ padding: '1.5rem' }}>
+          <div className="card" style={{ padding: 'clamp(1.25rem, 3vw, 1.5rem)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-              <div style={{ width: '40px', height: '40px', background: '#f0fdf4', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '40px', height: '40px', background: '#f0fdf4', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Lightbulb style={{ width: '20px', height: '20px', color: '#22c55e' }} />
               </div>
               <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e1b3a' }}>Solution</h2>
@@ -47,14 +47,14 @@ export default function AboutPage() {
         </div>
 
         {/* Innovation */}
-        <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+        <div className="card" style={{ padding: 'clamp(1.25rem, 3vw, 1.5rem)', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
-            <div style={{ width: '40px', height: '40px', background: '#f5f0ff', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '40px', height: '40px', background: '#f5f0ff', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Brain style={{ width: '20px', height: '20px', color: '#7c3aed' }} />
             </div>
             <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e1b3a' }}>Innovation</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: '0.625rem' }}>
             {[
               { icon: BarChart3, label: 'Explainable risk scoring' },
               { icon: Activity, label: 'PMOS Pattern Map' },
@@ -65,20 +65,20 @@ export default function AboutPage() {
               { icon: FileText, label: 'Doctor discussion summary' },
             ].map((item, i) => (
               <div key={i} style={{
-                display: 'flex', alignItems: 'center', gap: '0.75rem',
-                padding: '0.75rem', background: '#f5f0ff', borderRadius: '0.75rem',
+                display: 'flex', alignItems: 'center', gap: '0.625rem',
+                padding: '0.625rem', background: '#f5f0ff', borderRadius: '0.75rem',
               }}>
                 <item.icon style={{ width: '16px', height: '16px', color: '#8b5cf6', flexShrink: 0 }} />
-                <span style={{ fontSize: '0.8rem', color: '#1e1b3a', fontWeight: 500 }}>{item.label}</span>
+                <span style={{ fontSize: '0.75rem', color: '#1e1b3a', fontWeight: 500 }}>{item.label}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* AI Methodology */}
-        <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+        <div className="card" style={{ padding: 'clamp(1.25rem, 3vw, 1.5rem)', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-            <div style={{ width: '40px', height: '40px', background: '#eef2ff', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '40px', height: '40px', background: '#eef2ff', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Brain style={{ width: '20px', height: '20px', color: '#6366f1' }} />
             </div>
             <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e1b3a' }}>AI Methodology</h2>
@@ -86,7 +86,7 @@ export default function AboutPage() {
           <p style={{ fontSize: '0.85rem', color: '#6b7280', lineHeight: 1.7, marginBottom: '1rem' }}>
             PMOS Sense uses a two-layer approach combining deterministic scoring with generative AI:
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }} className="sm:!grid-cols-2">
             <div style={{ padding: '1rem', background: 'rgba(245,240,255,0.5)', borderRadius: '0.75rem', border: '1px solid #ede5ff' }}>
               <h3 style={{ fontWeight: 600, color: '#1e1b3a', marginBottom: '0.5rem', fontSize: '0.9rem' }}>Layer 1: Deterministic Scoring</h3>
               <p style={{ fontSize: '0.75rem', color: '#6b7280', lineHeight: 1.6 }}>
@@ -108,14 +108,14 @@ export default function AboutPage() {
         </div>
 
         {/* Technology Stack */}
-        <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+        <div className="card" style={{ padding: 'clamp(1.25rem, 3vw, 1.5rem)', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-            <div style={{ width: '40px', height: '40px', background: '#eff6ff', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '40px', height: '40px', background: '#eff6ff', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Code style={{ width: '20px', height: '20px', color: '#3b82f6' }} />
             </div>
             <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e1b3a' }}>Technology Stack</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '0.625rem' }}>
             {[
               { name: 'React', desc: 'UI Framework' },
               { name: 'TypeScript', desc: 'Type Safety' },
@@ -123,24 +123,24 @@ export default function AboutPage() {
               { name: 'Tailwind CSS', desc: 'Styling' },
               { name: 'Recharts', desc: 'Data Visualization' },
               { name: 'Gemini AI', desc: 'Generative AI' },
+              { name: 'Supabase', desc: 'Backend & Auth' },
               { name: 'React Router', desc: 'Navigation' },
-              { name: 'LocalStorage', desc: 'Data Persistence' },
             ].map((tech, i) => (
               <div key={i} style={{
-                padding: '0.75rem', background: '#faf8ff', borderRadius: '0.75rem',
+                padding: '0.75rem 0.5rem', background: '#faf8ff', borderRadius: '0.75rem',
                 border: '1px solid #e9e2f5', textAlign: 'center',
               }}>
-                <p style={{ fontSize: '0.8rem', fontWeight: 600, color: '#1e1b3a' }}>{tech.name}</p>
-                <p style={{ fontSize: '0.65rem', color: '#9ca3af', marginTop: '2px' }}>{tech.desc}</p>
+                <p style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1e1b3a' }}>{tech.name}</p>
+                <p style={{ fontSize: '0.6rem', color: '#9ca3af', marginTop: '2px' }}>{tech.desc}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Limitations */}
-        <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+        <div className="card" style={{ padding: 'clamp(1.25rem, 3vw, 1.5rem)', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-            <div style={{ width: '40px', height: '40px', background: '#fffbeb', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '40px', height: '40px', background: '#fffbeb', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <AlertTriangle style={{ width: '20px', height: '20px', color: '#f59e0b' }} />
             </div>
             <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e1b3a' }}>Limitations</h2>
@@ -152,39 +152,38 @@ export default function AboutPage() {
               'This tool does not diagnose PMOS or any other medical condition.',
               'AI-generated responses are for general educational purposes only.',
               'Results should not replace professional medical evaluation.',
-              'Data is stored locally in the browser and is not backed up.',
             ].map((item, i) => (
               <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', fontSize: '0.8rem', color: '#6b7280' }}>
-                <span style={{ color: '#f59e0b', marginTop: '2px' }}>•</span>
-                {item}
+                <span style={{ color: '#f59e0b', marginTop: '2px', flexShrink: 0 }}>•</span>
+                <span>{item}</span>
               </li>
             ))}
           </ul>
         </div>
 
         {/* Team Members */}
-        <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+        <div className="card" style={{ padding: 'clamp(1.25rem, 3vw, 1.5rem)', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-            <div style={{ width: '40px', height: '40px', background: '#faf5ff', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '40px', height: '40px', background: '#faf5ff', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Users style={{ width: '20px', height: '20px', color: '#a855f7' }} />
             </div>
             <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e1b3a' }}>Team Members</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '1rem' }}>
             {appConfig.teamMembers.map((member, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
                 <div style={{
-                  width: '64px', height: '64px', margin: '0 auto 0.5rem',
+                  width: '56px', height: '56px', margin: '0 auto 0.5rem',
                   background: 'linear-gradient(135deg, #ede5ff, #fce7f3)',
-                  borderRadius: '16px',
+                  borderRadius: '14px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '1.5rem',
+                  fontSize: '1.35rem',
                   boxShadow: '0 2px 8px rgba(139,92,246,0.1)',
                 }}>
                   {member.avatar}
                 </div>
-                <p style={{ fontSize: '0.7rem', fontWeight: 600, color: '#1e1b3a' }}>{member.role}</p>
-                <p style={{ fontSize: '0.7rem', fontWeight: 500, color: '#7c3aed' }}>{member.name}</p>
+                <p style={{ fontSize: '0.65rem', fontWeight: 600, color: '#1e1b3a' }}>{member.role}</p>
+                <p style={{ fontSize: '0.65rem', fontWeight: 500, color: '#7c3aed' }}>{member.name}</p>
               </div>
             ))}
           </div>

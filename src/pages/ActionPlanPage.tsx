@@ -5,17 +5,26 @@ import { type ScoringResult, createAISummary } from '../logic/scoring';
 import { generateActionPlan, isGeminiConfigured } from '../services/geminiService';
 import Disclaimer from '../components/Disclaimer';
 
-const CATEGORY_ICONS: Record<string, any> = {
-  'Menstrual Health': Heart, 'Nutrition': Apple, 'Physical Activity': Dumbbell,
-  'Sleep & Stress': Moon, 'Skin & Hair Care': Sparkles, 'Regular Check-ups': Stethoscope,
+const CATEGORY_ICONS: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+  'Menstrual Health': Heart, 'Menstrual & Hormonal Health': Heart,
+  'Nutrition': Apple, 'Nutrition & Exercise': Apple,
+  'Physical Activity': Dumbbell,
+  'Sleep & Stress': Moon, 'Stress & Sleep Care': Moon, 'Sleep & Stress Care': Moon,
+  'Skin & Hair Care': Sparkles,
+  'Regular Check-ups': Stethoscope, 'Doctor Visit Preparation': Stethoscope,
 };
 const CATEGORY_COLORS: Record<string, { bg: string; color: string }> = {
   'Menstrual Health': { bg: '#fdf2f8', color: '#ec4899' },
+  'Menstrual & Hormonal Health': { bg: '#fdf2f8', color: '#ec4899' },
   'Nutrition': { bg: '#f0fdf4', color: '#22c55e' },
+  'Nutrition & Exercise': { bg: '#f0fdf4', color: '#22c55e' },
   'Physical Activity': { bg: '#eff6ff', color: '#3b82f6' },
   'Sleep & Stress': { bg: '#eef2ff', color: '#6366f1' },
+  'Stress & Sleep Care': { bg: '#eef2ff', color: '#6366f1' },
+  'Sleep & Stress Care': { bg: '#eef2ff', color: '#6366f1' },
   'Skin & Hair Care': { bg: '#fdf2f8', color: '#ec4899' },
   'Regular Check-ups': { bg: '#fffbeb', color: '#f59e0b' },
+  'Doctor Visit Preparation': { bg: '#fffbeb', color: '#f59e0b' },
 };
 
 function getLocalRecommendations(result: ScoringResult): string {
@@ -127,7 +136,7 @@ export default function ActionPlanPage() {
     <div style={{ minHeight: '100vh', background: '#f8f5ff' }} className="animate-fade-in-up">
       <div style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem 1rem' }}>
         <div style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e1b3a' }}>Your Personalised Action Plan</h1>
+          <h1 style={{ fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', fontWeight: 700, color: '#1e1b3a' }}>Your Personalised Action Plan</h1>
           <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.25rem' }}>
             Based on your responses, here are some general recommendations.
           </p>
@@ -146,23 +155,23 @@ export default function ActionPlanPage() {
             <p style={{ color: '#6b7280', fontSize: '0.85rem', marginTop: '1rem' }}>Generating your personalised plan...</p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.25rem' }} className="sm:!grid-cols-2">
             {categories.map((cat) => {
               const Icon = CATEGORY_ICONS[cat.title] || Heart;
               const colors = CATEGORY_COLORS[cat.title] || { bg: '#f5f0ff', color: '#7c3aed' };
               return (
-                <div key={cat.title} className="card" style={{ padding: '1.5rem' }}>
+                <div key={cat.title} className="card" style={{ padding: 'clamp(1rem, 3vw, 1.5rem)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                    <div style={{ width: '40px', height: '40px', background: colors.bg, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: '40px', height: '40px', background: colors.bg, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <Icon style={{ width: '20px', height: '20px', color: colors.color }} />
                     </div>
-                    <h3 style={{ fontWeight: 600, color: '#1e1b3a', fontSize: '0.95rem' }}>{cat.title}</h3>
+                    <h3 style={{ fontWeight: 600, color: '#1e1b3a', fontSize: '0.9rem', overflowWrap: 'break-word', wordBreak: 'break-word' }}>{cat.title}</h3>
                   </div>
                   <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     {cat.items.map((item, j) => (
                       <li key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', fontSize: '0.8rem', color: '#4b5563', lineHeight: 1.6 }}>
-                        <span style={{ color: '#8b5cf6', marginTop: '2px', fontWeight: 'bold' }}>•</span>
-                        <span>{item.replace(/\*\*/g, '').replace(/^[*\-•]\s*/, '')}</span>
+                        <span style={{ color: '#8b5cf6', marginTop: '2px', fontWeight: 'bold', flexShrink: 0 }}>•</span>
+                        <span style={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}>{item.replace(/\*\*/g, '').replace(/^[*\-•]\s*/, '')}</span>
                       </li>
                     ))}
                   </ul>
@@ -188,7 +197,7 @@ function parsePlanCategories(text: string): { title: string; items: string[] }[]
     const hdr = line.match(/^#{1,3}\s+(.+)/);
     if (hdr) {
       if (current && current.items.length > 0) categories.push(current);
-      current = { title: hdr[1].trim(), items: [] };
+      current = { title: hdr[1].trim().replace(/\*\*/g, ''), items: [] };
       continue;
     }
     const bullet = line.match(/^[-*]\s+(.+)/);
